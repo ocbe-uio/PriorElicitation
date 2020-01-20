@@ -15,7 +15,7 @@ def y_sample(X):
 
 def bo_acquisition(m,X):
     pred_f=m.predict_noiseless(X)
-    acquisition_f=pred_f[0]+2.*np.sqrt(pred_f[1])#+np.random.normal(0,1e-3,np.shape(X))
+    acquisition_f=pred_f[0]+2.*np.sqrt(pred_f[1])
     return(acquisition_f)
 
 n_init=21
@@ -37,7 +37,6 @@ logit_link=Logit()
 lik_link=GPy.likelihoods.Bernoulli(gp_link=logit_link)
 
 laplace_inf = GPy.inference.latent_function_inference.Laplace()
-#vargauss_inf = GPy.inference.latent_function_inference.VarGauss()
 
 m = GPy.models.GPClassification(Xtrain,ytrain,kernel=kern,likelihood=lik_link,inference_method=laplace_inf)
 
@@ -86,28 +85,30 @@ lik_proxy=np.exp(m.predict_noiseless(Xgrid)[0])
 
 post_proxy=lik_proxy/(np.sum(lik_proxy*0.01))
 
+# ASK: what are we saving files for?
+
 #LET'S SAVE EVERYTHING HERE
 #WHAT IS EVERYTHING?
 #THETAS, SIMULATIONS AND EXPERT LABELS IN ORDER, IDEALLY
 #GPY PARAMS
-np.save('gpy_params.npy', m.param_array)
-#THETA ACQS
-np.save('theta_acquisitions.npy', m.X)
-#LABELS
-np.save('label_acquisitions.npy', m.Y)
-#SIMS IN ORDER
-#THETA GRID
-np.save("theta_grid.npy",Xgrid)
-#LIK PROXY
-np.save("lik_proxy.npy",lik_proxy)
-#POST PROXY
-np.save("post_proxy.npy",post_proxy)
-#mean_grid_prediction
-np.save("mean_pred_grid",pred_f[0])
-#var_grid_prediction
-np.save("var_pred_grid",pred_f[1])
-#simulations
-np.save("simulations.npy",np.array(simulations))
+# np.save('gpy_params.npy', m.param_array)
+# #THETA ACQS
+# np.save('theta_acquisitions.npy', m.X)
+# #LABELS
+# np.save('label_acquisitions.npy', m.Y)
+# #SIMS IN ORDER
+# #THETA GRID
+# np.save("theta_grid.npy",Xgrid)
+# #LIK PROXY
+# np.save("lik_proxy.npy",lik_proxy)
+# #POST PROXY
+# np.save("post_proxy.npy",post_proxy)
+# #mean_grid_prediction
+# np.save("mean_pred_grid",pred_f[0])
+# #var_grid_prediction
+# np.save("var_pred_grid",pred_f[1])
+# #simulations
+# np.save("simulations.npy",np.array(simulations))
 
 if plotting:
     plt.plot(Xgrid,pred_f[0])
