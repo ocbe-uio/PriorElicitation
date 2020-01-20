@@ -4,7 +4,9 @@ This is a web application for collecting data from content "specialists" in orde
 
 # Using
 
-To use this app, download all the data to your computer and run the [runShiny.R](runShiny.R) script in R. From an R session, execute
+After the development stage is complete, a stable version of this software will be available online.
+
+In the meantime, we recommend you download all the files from this repository to your computer and run the [runShiny.R](runShiny.R) script in R. From an R session, execute
 
 ```R
 source("runShiny.R")
@@ -12,7 +14,7 @@ source("runShiny.R")
 
 # Contributing
 
-This is Open Source softwareand all contributions are welcome.
+This is Open Source software and all contributions are welcome. If you would like to report a bug or request a feature, please open an issue on the [Issues page](https://github.com/ocbe-uio/PriorElicitation/issues).
 
 # Citing
 
