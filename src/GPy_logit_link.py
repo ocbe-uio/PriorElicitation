@@ -41,5 +41,3 @@ class Logit(GPTransformation):
         input_dict = super(Logit, self)._save_to_input_dict()
         input_dict["class"] = "GPy.likelihoods.link_functions.Logit"
         return input_dict
-
-
