@@ -1,4 +1,5 @@
 library(shiny)
+library(reticulate)
 
 # =========================== Define user interface ============================
 ui <- fluidPage(
@@ -20,7 +21,9 @@ ui <- fluidPage(
 			)
 		),
 		mainPanel(
-			plotOutput("prior"),
+			"Xtrain: ", textOutput("test"), #TEMP
+			"i: ", textOutput("i"),
+			"ss: ", textOutput("ss"),
 			"Past judgements: ", textOutput("decision_log")
 		)
 	)
@@ -28,27 +31,27 @@ ui <- fluidPage(
 
 # ============================ Define server logic =============================
 server <- function(input, output) {
-	output_log <- reactiveValues(decisions = NULL)
-	new_decision <- reactiveValues(decision = NULL, color = NULL)
+	# Initialize Python and R constants and functions
+	source_python("../src/0_Initial_objects.py")
+	source_python("../src/functions.py")
+	
+	output$test <- renderText(Xtrain) #TEMP
+	output_log <- reactiveValues(decisions = NULL)  # all judgements
+	new_decision <- reactiveValues(decision = NULL) # contains one (last) judgm.
+	i <- reactiveValues(i = 1)
+	
+	# Reacting to buttons
 	observeEvent(input$realistic, {
-		new_decision$decision <- "realistic"
-		new_decision$data <- rbinom(30, 5, .1)
-		output_log$decisions <- append(output_log$decisions, "realistic")
+		new_decision$decision <- 1
+		output_log$decisions <- append(output_log$decisions, 1)
 	})
 	observeEvent(input$unrealistic, {
-		new_decision$decision <- "unrealistic"
-		new_decision$data <- rbinom(10, 50, .9)
-		output_log$decisions <- append(output_log$decisions, "unrealistic")
-
+		new_decision$decision <- 0
+		output_log$decisions <- append(output_log$decisions, 0)
+		i$i <- i$i + 1
 	})
-	output$prior <- renderPlot({
-			if (is.null(new_decision$data)) {
-				# Initial prior
-				barplot(table(rbinom(100, 10, .5)))
-			} else {
-				barplot(table(new_decision$data))
-			}
-	})
+	output$ss <- renderText(rbinom(1, 100, Xtrain[i$i]))
+	output$i <- renderText(i$i)
 	output$decision_log <- renderText(output_log$decisions)
 }
 
