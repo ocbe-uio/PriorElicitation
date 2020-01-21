@@ -5,7 +5,6 @@ library(reticulate)
 # ============== Initialize Python and R constants and functions ===============
 source_python("../src/GPy_logit_link.py")
 source_python("../src/0_Initial_objects.py")
-pred_f <- NA
 
 # =========================== Define user interface ============================
 ui <- fluidPage(
@@ -27,20 +26,36 @@ ui <- fluidPage(
 			)
 		),
 		mainPanel(
+			"Peeking under the hood for development purposes...", br(),
 			"i: ", textOutput("i"),
-			"stop: ", textOutput("stop"),
 			"ss: ", textOutput("ss"),
-			"pred_f: ", tableOutput("pred_f")
+			"post_proxy: ",
+			br(),
+			plotOutput("post_proxy")
 		)
 	)
 )
 
 # ============================ Define server logic =============================
 server <- function(input, output) {
+	# Initializing values
 	output_log <- reactiveValues(decisions = NULL)  # all judgements
 	new_decision <- reactiveValues(decision = NULL) # contains one (last) judgm.
 	i <- reactiveValues(i = 1, stop = FALSE)
 	
+	# Backend calculations
+	output$ss <- renderText({
+		if (i$i <= n_init) {
+			gen_sim(Xtrain[i$i])
+		} else {
+			c(
+				"Simulation finalized. Judgement vector:", 
+				output_log$decisions
+			)
+			i$stop <- TRUE
+		}
+	})
+
 	# Basic reactions to buttons
 	observeEvent(input$realistic, {
 		new_decision$decision <- 1
@@ -57,34 +72,22 @@ server <- function(input, output) {
 		}
 	})
 
-	# Backend calculations
-	output$ss <- renderText({
-		if (i$i <= n_init) {
-			gen_sim(Xtrain[i$i])
-		} else {
-			c(
-				"Simulation finalized. Judgement vector:", 
-				output_log$decisions
-			)
-			i$stop <- TRUE
-		}
-	})
-
-	output$pred_f <- renderTable({
+	output$post_proxy <- renderImage({
 		if (!i$stop) {
-			NA
+			post_proxy <- 0
 		} else {
 			post_proxy <- classify(
-				Xtrain, as.matrix(output_log$decisions),n_init
+				Xtrain, as.matrix(output_log$decisions), n_init
 			)
-			summary(post_proxy)
 		}
-	})
+		outfile <- tempfile(fileext = '.png')
+		png(outfile, width=400, height=400)
+		hist(post_proxy)
+		dev.off()
 
-
-	# Generating other output
+		list(src = outfile, alt = "There should be a plot here")
+	}, deleteFile = TRUE)
 	output$i <- renderText(i$i)
-	output$stop <- renderText(i$stop)
 }
 
 # ================================ Run the app =================================
