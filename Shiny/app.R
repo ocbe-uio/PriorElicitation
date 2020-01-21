@@ -74,8 +74,10 @@ server <- function(input, output) {
 		if (!i$stop) {
 			NA
 		} else {
-			pred_f <- gen_pred_f(Xtrain, as.matrix(output_log$decisions))
-			sapply(pred_f, function(x) head(x, 20))
+			post_proxy <- classify(
+				Xtrain, as.matrix(output_log$decisions),n_init
+			)
+			summary(post_proxy)
 		}
 	})
 
