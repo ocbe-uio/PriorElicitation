@@ -31,7 +31,7 @@ ui <- fluidPage(
 			"ss: ", textOutput("ss"),
 			"post_proxy: ",
 			br(),
-			imageOutput("post_proxy")
+			plotOutput("post_proxy")
 		)
 	)
 )
@@ -74,14 +74,19 @@ server <- function(input, output) {
 
 	output$post_proxy <- renderImage({
 		if (!i$stop) {
-			boxplot(1)
+			post_proxy <- 0
 		} else {
 			post_proxy <- classify(
 				Xtrain, as.matrix(output_log$decisions), n_init
 			)
-			hist(post_proxy)
 		}
-	})
+		outfile <- tempfile(fileext = '.png')
+		png(outfile, width=400, height=400)
+		hist(post_proxy)
+		dev.off()
+
+		list(src = outfile, alt = "There should be a plot here")
+	}, deleteFile = TRUE)
 	output$i <- renderText(i$i)
 }
 
