@@ -4,9 +4,15 @@ This is a web application for collecting data from content "specialists" in orde
 
 # Using
 
-After the development stage is complete, a stable version of this software will be available online.
+After the development stage is complete, a stable version of this software will be available online with proper access instructions.
 
-In the meantime, we recommend you download all the files from this repository to your computer and run the [runShiny.R](runShiny.R) script in R. From an R session, execute
+In the meantime, we recommend you try the Shiny application by running the following command from an interactive R session (you may have to run `install.packages("shiny")` before to install the Shiny R package):
+
+```R
+shiny::runGitHub("PriorElicitation", "ocbe-uio", "dev", "Shiny")
+```
+
+Alternatively, you can download all the files from this repository to your computer and run the [runShiny.R](runShiny.R) script in R. From an R session, execute
 
 ```R
 source("runShiny.R")
