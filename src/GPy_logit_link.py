@@ -41,3 +41,30 @@ class Logit(GPTransformation):
         input_dict = super(Logit, self)._save_to_input_dict()
         input_dict["class"] = "GPy.likelihoods.link_functions.Logit"
         return input_dict
+
+def gen_pred_f(Xtrain, ytrain):
+    kern = GPy.kern.Matern32(input_dim = 1) \
+        + GPy.kern.White(input_dim = 1) \
+        + GPy.kern.Bias(input_dim = 1)
+
+    kern.Mat32.variance.set_prior(GPy.priors.Gamma.from_EV(1., 1.))
+
+    # probit_link = GPy.likelihoods.link_functions.Probit()
+    logit_link = Logit()
+
+    lik_link = GPy.likelihoods.Bernoulli(gp_link = logit_link)
+
+    laplace_inf = GPy.inference.latent_function_inference.Laplace()
+
+    m = GPy.models.GPClassification(
+        Xtrain, ytrain, kernel = kern, likelihood = lik_link,
+        inference_method = laplace_inf
+    )
+
+    m.optimize() #first runs EP and then optimizes the kernel parameters
+
+    Xgrid = np.expand_dims(np.linspace(0, 1, 2001), axis = 1)
+    pred_f = m.predict_noiseless(Xgrid)
+
+    pred_f = m.predict_noiseless(Xgrid) # ASK: why run this again?
+    return(pred_f)
