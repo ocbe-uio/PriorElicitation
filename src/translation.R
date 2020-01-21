@@ -2,5 +2,4 @@
 
 library(reticulate)
 
-source_python("GPy_logit_link.py")
 source_python("GP-Classifier-BayesOpt-Binomial.py")
