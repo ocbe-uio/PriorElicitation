@@ -46,8 +46,20 @@ server <- function(input, output) {
 	)
 
 	# Train or retrain the model
-	# output$model <- renderText({
-	# })
+	train_retrain <- reactive({
+		if (i$i > n_init & i$i <= n_tot) {
+			if (i$i == n_init + 1) {
+				# Train the model
+				model_fit(Xtrain, as.matrix(decisions$series))
+			} else if (i$i <= n_tot) {
+				# Retrain the model
+				model_update(
+					model$m, X_acq$X, as.matrix(decisions$latest), i$i,
+					n_opt
+				)
+			}
+		}
+	})
 	
 	# Simulating values for judgement
 	output$ss <- renderText({
@@ -55,18 +67,11 @@ server <- function(input, output) {
 			gen_sim(Xtrain[i$i])
 		} else if (i$i <= n_tot) {
 			i$round1over <- TRUE
-			if (i$i == n_init + 1) {
-				# Train the model
-				model$m <- model_fit(Xtrain, as.matrix(decisions$series))
-			} else if (i$i <= n_tot) {
-				# Retrain the model
-				model$m <- model_update(
-					model$m, X_acq$X, as.matrix(decisions$latest), i$i,
-					n_opt
-				)
-				# model$m <- model_fit(Xtrain, as.matrix(decisions$series))
-			}
-			X_acq$X <- acquire_X(model$m)
+			m <- train_retrain()
+			model$m <- m
+			X_acq$X <- acquire_X(m)
+			print(X_acq$X)
+			print(model$m)
 			gen_sim(X_acq$X)
 		} else {
 			i$round2over <- TRUE
