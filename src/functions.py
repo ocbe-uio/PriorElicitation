@@ -90,16 +90,20 @@ def plotting(Xtrain, ytrain, pred_f, Xgrid, lik_proxy, post_proxy, m, stage = 1)
         plt.show()
 
 def model_fit(Xtrain, ytrain):
+    # Kernel
     kern = GPy.kern.Matern32(input_dim = 1) \
     + GPy.kern.White(input_dim = 1) \
     + GPy.kern.Bias(input_dim = 1)
-
     kern.Mat32.variance.set_prior(GPy.priors.Gamma.from_EV(1., 1.))
 
+    # Likelihood
     logit_link = Logit()
     lik_link = GPy.likelihoods.Bernoulli(gp_link = logit_link)
+
+    # inference method
     laplace_inf = GPy.inference.latent_function_inference.Laplace()
 
+    # Model fit
     m = GPy.models.GPClassification(
         Xtrain, ytrain, kernel = kern, likelihood = lik_link,
         inference_method = laplace_inf
@@ -109,13 +113,21 @@ def model_fit(Xtrain, ytrain):
     return(m)
 
 def model_update(m, X_acq, y_acq, i, n_opt):
+    # Kernel
+    thiskern = m.kern.copy()
+
+    # Likelihood
     logit_link = Logit()
     lik_link = GPy.likelihoods.Bernoulli(gp_link = logit_link)
+
+    # Inference method
     laplace_inf = GPy.inference.latent_function_inference.Laplace()
     
+    # X and Y
     x = np.r_[m.X, X_acq]
     y = np.r_[m.Y, y_acq]
-    thiskern = m.kern.copy()
+
+    # Model fit
     m = GPy.models.GPClassification(
         x, y, kernel = thiskern, likelihood = lik_link,
         inference_method = laplace_inf
