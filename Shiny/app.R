@@ -64,16 +64,20 @@ server <- function(input, output) {
 			if (i$i == n_init + 1) {
 				model$start <- model_fit(Xtrain, as.matrix(decisions$series))
 				model$previous <- model$start
-				print("train")
+				message("Initial model:")
 				print(model$previous)
 				X <- get_X()
 			} else {
 				X <- get_X()
+				cat("X = ", X, "\n")
 				model$latest <- model_update(
 					model$previous, X, as.matrix(decisions$latest), i$i,
 					n_opt
 				)
-				print("retrain")
+				message(
+					"Retrained model given X = ", X, " and decision ", 
+					decisions$latest, ":"
+					)
 				print(model$latest)
 			}
 			gen_sim(X)
