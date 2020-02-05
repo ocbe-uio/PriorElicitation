@@ -3,8 +3,8 @@ library(shiny)
 library(reticulate)
 
 # ============== Initialize Python and R constants and functions ===============
-source_python("../src/GPy_logit_link.py")
-source_python("../src/0_Initial_objects.py")
+source_python("../src/functions.py")
+source_python("../src/initialObjects.py")
 
 # =========================== Define user interface ============================
 ui <- fluidPage(
@@ -29,9 +29,7 @@ ui <- fluidPage(
 			"Peeking under the hood for development purposes...", br(),
 			"i: ", textOutput("i"),
 			"ss: ", textOutput("ss"),
-			"post_proxy: ",
-			br(),
-			plotOutput("post_proxy")
+			# plotOutput("post_proxy")
 		)
 	)
 )
@@ -41,52 +39,62 @@ server <- function(input, output) {
 	# Initializing values
 	output_log <- reactiveValues(decisions = NULL)  # all judgements
 	new_decision <- reactiveValues(decision = NULL) # contains one (last) judgm.
-	i <- reactiveValues(i = 1, stop = FALSE)
+	i <- reactiveValues(i = 1, round1over = FALSE, round2over = FALSE)
 	
 	# Backend calculations
 	output$ss <- renderText({
 		if (i$i <= n_init) {
 			gen_sim(Xtrain[i$i])
+		} else if (i$i <= (n_init + n_update)) {
+			i$round1over <- TRUE
+			model <- model(Xtrain, as.matrix(output_log$decisions))
+			X_acq <- acquire_X(model)
+			gen_sim(X_acq)
 		} else {
-			c(
-				"Simulation finalized. Judgement vector:", 
-				output_log$decisions
-			)
-			i$stop <- TRUE
+			i$round2over <- TRUE
 		}
 	})
 
 	# Basic reactions to buttons
 	observeEvent(input$realistic, {
 		new_decision$decision <- 1
-		if (!i$stop) {
+		if (!i$round1over) {
+			# Decision log is only populated during round 1
 			output_log$decisions <- append(output_log$decisions, 1)
-			i$i <- i$i + 1
 		}
+		i$i <- i$i + 1
 	})
 	observeEvent(input$unrealistic, {
 		new_decision$decision <- 0
-		if (!i$stop) {
+		if (!i$round1over) {
+			# Decision log is only populated during round 1
 			output_log$decisions <- append(output_log$decisions, 0)
-			i$i <- i$i + 1
 		}
+		i$i <- i$i + 1
 	})
 
-	output$post_proxy <- renderImage({
-		if (!i$stop) {
-			post_proxy <- 0
-		} else {
-			post_proxy <- classify(
-				Xtrain, as.matrix(output_log$decisions), n_init
-			)
-		}
-		outfile <- tempfile(fileext = '.png')
-		png(outfile, width=400, height=400)
-		hist(post_proxy)
-		dev.off()
+	# output$round2 <- renderPrint({
+	# 	if (i$stop) {
+	# 		X_acq <- acquire_X(Xtrain, as.matrix(output_log$decisions), n_init)
+	# 		gen_sim(X_acq)
+	# 	}
+	# })
 
-		list(src = outfile, alt = "There should be a plot here")
-	}, deleteFile = TRUE)
+	# output$post_proxy <- renderImage({
+	# 	if (!i$stop) {
+	# 		post_proxy <- 0
+	# 	} else {
+	# 		post_proxy <- classify(
+	# 			Xtrain, as.matrix(output_log$decisions), n_init
+	# 		)
+	# 	}
+	# 	outfile <- tempfile(fileext = '.png')
+	# 	png(outfile, width=400, height=400)
+	# 	hist(post_proxy)
+	# 	dev.off()
+
+	# 	list(src = outfile, alt = "There should be a plot here")
+	# }, deleteFile = TRUE)
 	output$i <- renderText(i$i)
 }
 
