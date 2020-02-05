@@ -28,7 +28,8 @@ ui <- fluidPage(
 		mainPanel(
 			"Peeking under the hood for development purposes...", br(),
 			"i: ", textOutput("i"),
-			"ss: ", textOutput("ss")
+			"ss: ", textOutput("ss"),
+			"post_proxy: ", plotOutput("post_proxy")
 		)
 	)
 )
@@ -63,16 +64,20 @@ server <- function(input, output) {
 			if (i$i == n_init + 1) {
 				model$start <- model_fit(Xtrain, as.matrix(decisions$series))
 				model$previous <- model$start
-				print("train")
+				message("Initial model:")
 				print(model$previous)
 				X <- get_X()
 			} else {
 				X <- get_X()
+				cat("X = ", X, "\n")
 				model$latest <- model_update(
 					model$previous, X, as.matrix(decisions$latest), i$i,
 					n_opt
 				)
-				print("retrain")
+				message(
+					"Retrained model given X = ", X, " and decision ", 
+					decisions$latest, ":"
+					)
 				print(model$latest)
 			}
 			gen_sim(X)
@@ -116,21 +121,19 @@ server <- function(input, output) {
 	# 	}
 	# })
 
-	# output$post_proxy <- renderImage({
-	# 	if (!i$stop) {
-	# 		post_proxy <- 0
-	# 	} else {
-	# 		post_proxy <- classify(
-	# 			Xtrain, as.matrix(decisions$series), n_init
-	# 		)
-	# 	}
-	# 	outfile <- tempfile(fileext = '.png')
-	# 	png(outfile, width=400, height=400)
-	# 	hist(post_proxy)
-	# 	dev.off()
+	output$post_proxy <- renderImage({
+		if  (!i$round1over | !i$round2over) {
+			post_proxy <- 0
+		} else {
+			post_proxy <- calc_post_proxy(model$latest)
+		}
+		outfile <- tempfile(fileext = '.png')
+		png(outfile, width=400, height=400)
+		hist(post_proxy)
+		dev.off()
 
-	# 	list(src = outfile, alt = "There should be a plot here")
-	# }, deleteFile = TRUE)
+		list(src = outfile, alt = "There should be a plot here")
+	}, deleteFile = TRUE)
 
 	# Controls for development
 	output$i <- renderText(i$i)
