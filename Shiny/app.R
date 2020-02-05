@@ -3,8 +3,8 @@ library(shiny)
 library(reticulate)
 
 # ============== Initialize Python and R constants and functions ===============
-source_python("../src/GPy_logit_link.py")
-source_python("../src/0_Initial_objects.py")
+source_python("../src/functions.py")
+source_python("../src/initialObjects.py")
 
 # =========================== Define user interface ============================
 ui <- fluidPage(
