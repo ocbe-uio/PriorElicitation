@@ -36,43 +36,46 @@ ui <- fluidPage(
 # ============================ Define server logic =============================
 server <- function(input, output) {
 	# Initializing values
-	# TODO: move latest_decision into decisions
 	decisions <- reactiveValues(series = NULL, latest = NULL)  # all judgements
-	model <- reactiveValues(m = NULL)
-	X_acq <- reactiveValues(X = NULL)
+	model <- reactiveValues(start = NULL, previous = NULL, latest = NULL)
+	X <- reactiveVal()
 	## Misc. counters
 	i <- reactiveValues(
 		i = 1, round1over = FALSE, round2over = FALSE
 	)
 
-	# Train or retrain the model
-	train_retrain <- reactive({
-		if (i$i > n_init & i$i <= n_tot) {
-			if (i$i == n_init + 1) {
-				# Train the model
-				model_fit(Xtrain, as.matrix(decisions$series))
-			} else if (i$i <= n_tot) {
-				# Retrain the model
-				model_update(
-					model$m, X_acq$X, as.matrix(decisions$latest), i$i,
-					n_opt
-				)
-			}
-		}
+	get_X <- reactive({
+		if (i$i <= n_init) {
+			Xtrain[i$i]
+		} else if (i$i <= n_tot) {
+			acquire_X(model$previous)
+		} else {
+			0
+		}		
 	})
-	
+
 	# Simulating values for judgement
 	output$ss <- renderText({
 		if (i$i <= n_init) {
-			gen_sim(Xtrain[i$i])
+			gen_sim(get_X())
 		} else if (i$i <= n_tot) {
 			i$round1over <- TRUE
-			m <- train_retrain()
-			model$m <- m
-			X_acq$X <- acquire_X(m)
-			print(X_acq$X)
-			print(model$m)
-			gen_sim(X_acq$X)
+			if (i$i == n_init + 1) {
+				model$start <- model_fit(Xtrain, as.matrix(decisions$series))
+				model$previous <- model$start
+				print("train")
+				print(model$previous)
+				X <- get_X()
+			} else {
+				X <- get_X()
+				model$latest <- model_update(
+					model$previous, X, as.matrix(decisions$latest), i$i,
+					n_opt
+				)
+				print("retrain")
+				print(model$latest)
+			}
+			gen_sim(X)
 		} else {
 			i$round2over <- TRUE
 		}
