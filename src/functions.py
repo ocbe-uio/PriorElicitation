@@ -96,11 +96,9 @@ def model_fit(Xtrain, ytrain):
     + GPy.kern.Bias(input_dim = 1)
     kern.Mat32.variance.set_prior(GPy.priors.Gamma.from_EV(1., 1.))
 
-    # Likelihood
+    # Likelihood and inference method (identical to model_update)
     logit_link = Logit()
     lik_link = GPy.likelihoods.Bernoulli(gp_link = logit_link)
-
-    # inference method
     laplace_inf = GPy.inference.latent_function_inference.Laplace()
 
     # Model fit
@@ -113,14 +111,13 @@ def model_fit(Xtrain, ytrain):
     return(m)
 
 def model_update(m, X_acq, y_acq, i, n_opt):
+    # import pdb; pdb.set_trace() # debugging breakpoint
     # Kernel
     thiskern = m.kern.copy()
 
-    # Likelihood
+    # Likelihood and inference method (identical to model_fit)
     logit_link = Logit()
     lik_link = GPy.likelihoods.Bernoulli(gp_link = logit_link)
-
-    # Inference method
     laplace_inf = GPy.inference.latent_function_inference.Laplace()
     
     # X and Y
