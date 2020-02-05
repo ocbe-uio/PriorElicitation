@@ -28,8 +28,7 @@ ui <- fluidPage(
 		mainPanel(
 			"Peeking under the hood for development purposes...", br(),
 			"i: ", textOutput("i"),
-			"ss: ", textOutput("ss"),
-			# plotOutput("post_proxy")
+			"ss: ", textOutput("ss")
 		)
 	)
 )
@@ -37,45 +36,74 @@ ui <- fluidPage(
 # ============================ Define server logic =============================
 server <- function(input, output) {
 	# Initializing values
-	output_log <- reactiveValues(decisions = NULL)  # all judgements
-	new_decision <- reactiveValues(decision = NULL) # contains one (last) judgm.
-	i <- reactiveValues(i = 1, round1over = FALSE, round2over = FALSE)
+	# TODO: move latest_decision into decisions
+	decisions <- reactiveValues(series = NULL, latest = NULL)  # all judgements
+	model <- reactiveValues(m = NULL)
+	X_acq <- reactiveValues(X = NULL)
+	## Misc. counters
+	i <- reactiveValues(
+		i = 1, round1over = FALSE, round2over = FALSE
+	)
+
+	# Train or retrain the model
+	# output$model <- renderText({
+	# })
 	
-	# Backend calculations
+	# Simulating values for judgement
 	output$ss <- renderText({
 		if (i$i <= n_init) {
 			gen_sim(Xtrain[i$i])
-		} else if (i$i <= (n_init + n_update)) {
+		} else if (i$i <= n_tot) {
 			i$round1over <- TRUE
-			model <- model(Xtrain, as.matrix(output_log$decisions))
-			X_acq <- acquire_X(model)
-			gen_sim(X_acq)
+			if (i$i == n_init + 1) {
+				# Train the model
+				model$m <- model_fit(Xtrain, as.matrix(decisions$series))
+			} else if (i$i <= n_tot) {
+				# Retrain the model
+				model$m <- model_update(
+					model$m, X_acq$X, as.matrix(decisions$latest), i$i,
+					n_opt
+				)
+				# model$m <- model_fit(Xtrain, as.matrix(decisions$series))
+			}
+			X_acq$X <- acquire_X(model$m)
+			gen_sim(X_acq$X)
 		} else {
 			i$round2over <- TRUE
 		}
 	})
 
-	# Basic reactions to buttons
+	# Basic reactions to buttons (i.e., recording judgements)
 	observeEvent(input$realistic, {
-		new_decision$decision <- 1
+		# Record latest decision
+		decisions$latest <- 1
+		
+		# Append latest decision to the archive
 		if (!i$round1over) {
 			# Decision log is only populated during round 1
-			output_log$decisions <- append(output_log$decisions, 1)
+			decisions$series <- append(decisions$series, 1)
 		}
-		i$i <- i$i + 1
+		if (!i$round1over | !i$round2over) {
+			i$i <- i$i + 1
+		}
 	})
 	observeEvent(input$unrealistic, {
-		new_decision$decision <- 0
+		# Record latest decision
+		decisions$latest <- 0
+
+		# Append latest decision to the archive
 		if (!i$round1over) {
 			# Decision log is only populated during round 1
-			output_log$decisions <- append(output_log$decisions, 0)
+			decisions$series <- append(decisions$series, 0)
 		}
-		i$i <- i$i + 1
+		if (!i$round1over | !i$round2over) {
+			i$i <- i$i + 1
+		}
 	})
 
 	# output$round2 <- renderPrint({
 	# 	if (i$stop) {
-	# 		X_acq <- acquire_X(Xtrain, as.matrix(output_log$decisions), n_init)
+	# 		X_acq <- acquire_X(Xtrain, as.matrix(decisions$series), n_init)
 	# 		gen_sim(X_acq)
 	# 	}
 	# })
@@ -85,7 +113,7 @@ server <- function(input, output) {
 	# 		post_proxy <- 0
 	# 	} else {
 	# 		post_proxy <- classify(
-	# 			Xtrain, as.matrix(output_log$decisions), n_init
+	# 			Xtrain, as.matrix(decisions$series), n_init
 	# 		)
 	# 	}
 	# 	outfile <- tempfile(fileext = '.png')
@@ -95,7 +123,11 @@ server <- function(input, output) {
 
 	# 	list(src = outfile, alt = "There should be a plot here")
 	# }, deleteFile = TRUE)
+
+	# Controls for development
 	output$i <- renderText(i$i)
+	output$r1ovr <- renderText(i$round1over)
+	output$r2ovr <- renderText(i$round2over)
 }
 
 # ================================ Run the app =================================
