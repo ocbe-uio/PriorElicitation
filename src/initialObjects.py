@@ -2,7 +2,8 @@
 import numpy as np
 
 n_init = 10 #TODO: change back to default of 21 after testing
-n_update = 15 - n_init # TODO: change back to default (100) after testing
+n_update = 5 # TODO: change back to default (100) after testing
+n_tot = n_init + n_update
 n_opt = 5
 plotting = False
 simulations = []
