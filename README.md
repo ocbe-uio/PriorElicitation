@@ -12,7 +12,7 @@ In the meantime, we recommend you try the Shiny application by running the follo
 shiny::runGitHub("PriorElicitation", "ocbe-uio", "dev", "Shiny")
 ```
 
-Alternatively, you can download all the files from this repository to your computer and run the [runShiny.R](runShiny.R) script in R. From an R session, execute
+The command above will always run the latest development version of the app available on GitHub. If you download a copy of the code, you can run that local copy by executing the [runShiny.R](runShiny.R) script in R.
 
 ```R
 source("runShiny.R")
