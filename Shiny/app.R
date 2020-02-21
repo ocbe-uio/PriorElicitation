@@ -6,6 +6,9 @@ library(reticulate)
 source_python("../src/functions.py")
 source_python("../src/initialObjects.py")
 
+# Randomizing X
+Xtrain_permutated <- sample(Xtrain)
+
 # =========================== Define user interface ============================
 ui <- fluidPage(
 	titlePanel("Prior elicitation"),
@@ -47,7 +50,7 @@ server <- function(input, output) {
 
 	get_X <- reactive({
 		if (i$i <= n_init) {
-			Xtrain[i$i]
+			Xtrain_permutated[i$i]
 		} else if (i$i <= n_tot) {
 			acquire_X(model$previous)
 		} else {
