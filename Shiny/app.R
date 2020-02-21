@@ -1,4 +1,3 @@
-# TODO: split into ui.R and server.R as soon as app is more standalone
 library(shiny)
 library(reticulate)
 
@@ -43,6 +42,7 @@ server <- function(input, output) {
 	decisions <- reactiveValues(series = NULL, latest = NULL)  # all judgements
 	model <- reactiveValues(start = NULL, previous = NULL, latest = NULL)
 	X <- reactiveVal()
+
 	## Misc. counters
 	i <- reactiveValues(
 		i = 1, round1over = FALSE, round2over = FALSE
@@ -58,7 +58,7 @@ server <- function(input, output) {
 		}		
 	})
 
-	# Simulating values for judgement
+	# Simulating values for judgement (ss)
 	output$ss <- renderText({
 		if (i$i <= n_init) {
 			gen_sim(get_X())
@@ -116,13 +116,6 @@ server <- function(input, output) {
 			i$i <- i$i + 1
 		}
 	})
-
-	# output$round2 <- renderPrint({
-	# 	if (i$stop) {
-	# 		X_acq <- acquire_X(Xtrain, as.matrix(decisions$series), n_init)
-	# 		gen_sim(X_acq)
-	# 	}
-	# })
 
 	output$post_proxy <- renderImage({
 		if  (!i$round1over | !i$round2over) {
