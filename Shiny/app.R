@@ -31,13 +31,14 @@ ui <- fluidPage(
 			"Peeking under the hood for development purposes...", br(),
 			"i: ", textOutput("i"),
 			"ss: ", textOutput("ss"),
-			"post_proxy: ", plotOutput("post_proxy")
+			"post_proxy: ", plotOutput("post_proxy"),
+			h2(uiOutput("final_link"))
 		)
 	)
 )
 
 # ============================ Define server logic =============================
-server <- function(input, output) {
+server <- function(input, output, session) {
 	# Initializing values
 	decisions <- reactiveValues(series = NULL, latest = NULL)  # all judgements
 	model <- reactiveValues(start = NULL, previous = NULL, latest = NULL)
@@ -119,8 +120,10 @@ server <- function(input, output) {
 
 	output$post_proxy <- renderImage({
 		if  (!i$round1over | !i$round2over) {
+			# Round 1 or round 2 ongoing
 			post_proxy <- 0
 		} else {
+			# Both rounds are over
 			post_proxy <- calc_post_proxy(model$latest)
 		}
 		outfile <- tempfile(fileext = '.png')
@@ -131,10 +134,37 @@ server <- function(input, output) {
 		list(src = outfile, alt = "There should be a plot here")
 	}, deleteFile = TRUE)
 
+	url <- a("CLICK HERE", href="http://www.uio.no")
+	output$final_link <- renderUI({
+		if (i$round1over & i$round2over) {
+			tagList(
+				"Thank you for your contribution! Please", url,
+				"to submit your results and conclude your participation."
+			)
+		} else {
+			NULL
+		}
+	})
+
 	# Controls for development
 	output$i <- renderText(i$i)
 	output$r1ovr <- renderText(i$round1over)
 	output$r2ovr <- renderText(i$round2over)
+
+	# Saving output
+	session$onSessionEnded(function() {
+		saved_objects <- list(
+			"Xtrain"            = isolate(Xtrain),
+			"Xtrain_permutated" = isolate(Xtrain_permutated),
+			"decisions"         = isolate(decisions$series),
+			"final_model"       = isolate(model$latest)
+		)
+		machine_name <- system("uname -n", intern=TRUE)
+		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
+		filename <- paste("Results", machine_name, date_time, sep="_")
+		saveRDS(saved_objects, file = paste0(filename, ".rds"))
+		stopApp()
+	})
 }
 
 # ================================ Run the app =================================
