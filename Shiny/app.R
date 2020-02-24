@@ -23,7 +23,7 @@ ui <- fluidPage(
 			),
 			actionButton(
 				inputId = "unrealistic",
-				label = "This is not realistic", 
+				label = "This is not realistic",
 				style = "background-color:#BB0000"
 			)
 		),
@@ -51,19 +51,24 @@ server <- function(input, output, session) {
 
 	get_X <- reactive({
 		if (i$i <= n_init) {
+			# First round
 			Xtrain_permutated[i$i]
 		} else if (i$i <= n_tot) {
+			# Second round
 			acquire_X(model$previous)
 		} else {
+			# Experiment over
 			0
-		}		
+		}
 	})
 
 	# Simulating values for judgement (ss)
 	output$ss <- renderText({
 		if (i$i <= n_init) {
+			# First round
 			gen_sim(get_X())
 		} else if (i$i <= n_tot) {
+			# Second round
 			i$round1over <- TRUE
 			if (i$i == n_init + 1) {
 				# First turn of second round
@@ -83,9 +88,9 @@ server <- function(input, output, session) {
 					n_opt
 				)
 				message(
-					"Retrained model given X = ", X, " and decision ", 
+					"Retrained model given X = ", X, " and decision ",
 					decisions$latest, ":"
-					)
+				)
 				print(model$latest)
 			}
 			gen_sim(X)
@@ -98,7 +103,7 @@ server <- function(input, output, session) {
 	observeEvent(input$realistic, {
 		# Record latest decision
 		decisions$latest <- 1
-		
+
 		# Append latest decision to the archive
 		if (!i$round1over) {
 			# Decision log is only populated during round 1
@@ -165,8 +170,8 @@ server <- function(input, output, session) {
 		)
 		machine_name <- system("uname -n", intern=TRUE)
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
-		filename <- paste("Results", machine_name, date_time, sep="_")
-		saveRDS(saved_objects, file = paste0(filename, ".rds"))
+		file_name <- paste("Results", machine_name, date_time, sep="_")
+		saveRDS(saved_objects, file = paste0(file_name, ".rds"))
 		stopApp()
 	})
 }
