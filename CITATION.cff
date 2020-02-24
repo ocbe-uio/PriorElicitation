@@ -3,15 +3,20 @@
 message: "If you use this software, please cite it using these metadata"
 authors:
   -
+    family-names: Thomas
+    given-names: Owen Matthew Truscott
+    email: "o.m.t.thomas@medisin.uio.no"
+    affiliation: "Oslo Centre for Biostatistics and Epidemiology"
+  -
     family-names: Leoncio
     given-names: Waldir
     name-suffix: Netto
     email: "w.l.netto@medisin.uio.no"
     affiliation: "Oslo Centre for Biostatistics and Epidemiology"
   -
-    family-names: Truscott Thomas
-    given-names: Owen Matthew
-    email: "o.m.t.thomas@medisin.uio.no"
+    family-names: Corander
+    given-names: Jukka
+    email: "jukka.corander@medisin.uio.no"
     affiliation: "Oslo Centre for Biostatistics and Epidemiology"
 title: A Shiny app for prior elicitation
 version: 0.0.0-prerelease
