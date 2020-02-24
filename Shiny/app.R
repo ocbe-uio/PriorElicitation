@@ -137,7 +137,7 @@ server <- function(input, output, session) {
 		}
 		outfile <- tempfile(fileext = '.png')
 		png(outfile, width=400, height=400)
-		hist(post_proxy)
+		plot(post_proxy)
 		dev.off()
 
 		list(src = outfile, alt = "There should be a plot here")
