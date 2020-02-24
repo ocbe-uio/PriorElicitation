@@ -66,7 +66,11 @@ server <- function(input, output, session) {
 		} else if (i$i <= n_tot) {
 			i$round1over <- TRUE
 			if (i$i == n_init + 1) {
-				model$start <- model_fit(Xtrain, as.matrix(decisions$series))
+				# First turn of second round
+				model$start <- model_fit(
+					Xtrain = as.matrix(Xtrain_permutated),
+					ytrain = as.matrix(decisions$series)
+				)
 				model$previous <- model$start
 				message("Initial model:")
 				print(model$previous)
