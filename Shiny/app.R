@@ -95,8 +95,8 @@ server <- function(input, output, session) {
 				X$latest <- get_X()
 				cat("X = ", X$latest, "\n")
 				model$latest <- model_update(
-					model$previous, X$latest, as.matrix(decisions$latest), i$i,
-					n_opt
+					model$previous, as.matrix(X$series),
+					as.matrix(decisions$series), i$i, n_opt
 				)
 				# TODO: update previous model with latest
 				if (debug) {
