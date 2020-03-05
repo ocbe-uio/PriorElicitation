@@ -47,6 +47,8 @@ server <- function(input, output, session) {
 	model <- reactiveValues(start = NULL, previous = NULL, latest = NULL)
 	X <- reactiveVal()
 
+	sim_result <- reactiveValues(series = NULL, latest = NULL)
+
 	## Misc. counters
 	i <- reactiveValues(
 		i = 1, round1over = FALSE, round2over = FALSE
@@ -69,7 +71,7 @@ server <- function(input, output, session) {
 	output$ss <- renderText({
 		if (i$i <= n_init) {
 			# First round
-			gen_sim(get_X())
+			sim_result$latest <- gen_sim(get_X())
 		} else if (i$i <= n_tot) {
 			# Second round
 			i$round1over <- TRUE
@@ -114,6 +116,7 @@ server <- function(input, output, session) {
 
 		if (!i$round1over | !i$round2over) {
 			i$i <- i$i + 1
+			sim_result$series <- append(sim_result$series, sim_result$latest)
 		}
 	})
 	observeEvent(input$unrealistic, {
@@ -123,6 +126,7 @@ server <- function(input, output, session) {
 
 		if (!i$round1over | !i$round2over) {
 			i$i <- i$i + 1
+			sim_result$series <- append(sim_result$series, sim_result$latest)
 		}
 	})
 
@@ -162,15 +166,25 @@ server <- function(input, output, session) {
 	# Saving output
 	session$onSessionEnded(function() {
 		saved_objects <- list(
-			"Xtrain"            = isolate(Xtrain),
-			"Xtrain_permutated" = isolate(Xtrain_permutated),
-			"decisions"         = isolate(decisions$series),
-			"final_model"       = isolate(model$latest)
+			"gpy_params" = isolate(model$latest$param_array),
+			"theta_acquisitions" = isolate(model$latest$X), # FIXME: 22, not 100
+			"label_acquisitions" = isolate(decisions$series),
+			"theta_grid" = NULL,
+			"lik_proxy" = NULL,
+			"post_proxy" = isolate(calc_post_proxy(model$latest)),
+			"mean_pred_grid" = NULL,
+			"var_pred_grid" = NULL,
+			"simulations" = isolate(sim_result$series)
 		)
 		machine_name <- system("uname -n", intern=TRUE)
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
 		file_name <- paste("Results", machine_name, date_time, sep="_")
-		if (!debug) saveRDS(saved_objects, file = paste0(file_name, ".rds"))
+		if (debug) {
+			message("Structure of the exported list:")
+			print(str(saved_objects))
+		} else {
+			saveRDS(saved_objects, file = paste0(file_name, ".rds"))
+		}
 		stopApp()
 	})
 }
