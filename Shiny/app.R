@@ -102,7 +102,7 @@ server <- function(input, output, session) {
 					print(model$latest)
 				}
 			}
-			gen_sim(X)
+			sim_result$latest <- gen_sim(X)
 		} else {
 			i$round2over <- TRUE
 		}
