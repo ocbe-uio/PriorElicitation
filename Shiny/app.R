@@ -179,7 +179,12 @@ server <- function(input, output, session) {
 		machine_name <- system("uname -n", intern=TRUE)
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
 		file_name <- paste("Results", machine_name, date_time, sep="_")
-		if (!debug) saveRDS(saved_objects, file = paste0(file_name, ".rds"))
+		if (debug) {
+			message("Structure of the exported list:")
+			print(str(saved_objects))
+		} else {
+			saveRDS(saved_objects, file = paste0(file_name, ".rds"))
+		}
 		stopApp()
 	})
 }
