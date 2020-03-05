@@ -76,7 +76,8 @@ server <- function(input, output, session) {
 	output$ss <- renderText({
 		if (i$i <= n_init) {
 			# First round
-			sim_result$latest <- gen_sim(get_X())
+			X <- get_X()
+			sim_result$latest <- gen_sim(X)
 		} else if (i$i <= n_tot) {
 			# Second round
 			i$round1over <- TRUE
