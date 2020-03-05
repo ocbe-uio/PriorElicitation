@@ -167,7 +167,7 @@ server <- function(input, output, session) {
 	session$onSessionEnded(function() {
 		saved_objects <- list(
 			"gpy_params" = isolate(model$latest$param_array),
-			"theta_acquisitions" = isolate(model$latest$X), # FIXME: 22, not 100
+			"theta_acquisitions" = isolate(model$latest$X), # FIXME: n_init + 1
 			"label_acquisitions" = isolate(decisions$series),
 			"theta_grid" = NULL,
 			"lik_proxy" = NULL,
@@ -181,7 +181,7 @@ server <- function(input, output, session) {
 		file_name <- paste("Results", machine_name, date_time, sep="_")
 		if (debug) {
 			message("Exported list:")
-			print(saved_objects)
+			print(lapply(saved_objects, function(x) head(x, 50)))
 		} else {
 			saveRDS(saved_objects, file = paste0(file_name, ".rds"))
 		}
