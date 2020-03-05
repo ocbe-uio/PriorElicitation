@@ -91,6 +91,7 @@ server <- function(input, output, session) {
 				message("Initial model:")
 				print(model$previous)
 				X$latest <- get_X()
+				gen_sim(X$latest)
 			} else {
 				X$latest <- get_X()
 				cat("X = ", X$latest, "\n")
