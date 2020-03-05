@@ -5,6 +5,9 @@ library(reticulate)
 source_python("../src/functions.py")
 source_python("../src/initialObjects.py")
 
+# Manual debugging switch
+debug <- TRUE
+
 # Randomizing X
 Xtrain_permutated <- sample(Xtrain)
 
@@ -87,11 +90,15 @@ server <- function(input, output, session) {
 					model$previous, X, as.matrix(decisions$latest), i$i,
 					n_opt
 				)
-				message(
-					"Retrained model given X = ", X, " and decision ",
-					decisions$latest, ":"
-				)
-				print(model$latest)
+				# TODO: update previous model with latest
+				if (debug) {
+					cat("X = ", X, "\n")
+					message(
+						"Retrained model given X = ", X,
+						" and decision ", decisions$latest, ":"
+					)
+					print(model$latest)
+				}
 			}
 			gen_sim(X)
 		} else {
@@ -171,7 +178,7 @@ server <- function(input, output, session) {
 		machine_name <- system("uname -n", intern=TRUE)
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
 		file_name <- paste("Results", machine_name, date_time, sep="_")
-		saveRDS(saved_objects, file = paste0(file_name, ".rds"))
+		if (!debug) saveRDS(saved_objects, file = paste0(file_name, ".rds"))
 		stopApp()
 	})
 }
