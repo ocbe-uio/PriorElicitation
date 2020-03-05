@@ -49,7 +49,7 @@ server <- function(input, output, session) {
 	# Initializing values
 	decisions <- reactiveValues(series = NULL, latest = NULL)  # judgements (Y)
 	model <- reactiveValues(start = NULL, previous = NULL, latest = NULL)
-	X <- reactiveValues(latest = NULL)
+	X <- reactiveValues(series = NULL, latest = NULL)
 
 	sim_result <- reactiveValues(series = NULL, latest = NULL)
 
@@ -121,6 +121,7 @@ server <- function(input, output, session) {
 
 		if (!i$round1over | !i$round2over) {
 			i$i <- i$i + 1
+			X$series <- append(X$series, X$latest)
 			sim_result$series <- append(sim_result$series, sim_result$latest)
 		}
 	})
@@ -131,6 +132,7 @@ server <- function(input, output, session) {
 
 		if (!i$round1over | !i$round2over) {
 			i$i <- i$i + 1
+			X$series <- append(X$series, X$latest)
 			sim_result$series <- append(sim_result$series, sim_result$latest)
 		}
 	})
@@ -172,8 +174,10 @@ server <- function(input, output, session) {
 	session$onSessionEnded(function() {
 		saved_objects <- list(
 			"gpy_params" = isolate(model$latest$param_array),
-			"theta_acquisitions" = isolate(model$latest$X), # FIXME: n_init + 1
-			"label_acquisitions" = isolate(decisions$series),
+			# FIXME: theta_acq and label_acq should match their models counterparts
+			# when the model updates are fixed
+			"theta_acquisitions" = isolate(X$series), # TODO: must match m.X
+			"label_acquisitions" = isolate(decisions$series), # TODO: must match m.Y
 			"theta_grid" = NULL,
 			"lik_proxy" = NULL,
 			"post_proxy" = isolate(calc_post_proxy(model$latest)),
@@ -185,7 +189,7 @@ server <- function(input, output, session) {
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
 		file_name <- paste("Results", machine_name, date_time, sep="_")
 		if (debug) {
-			message("Exported list:")
+			cat("Exported list:\n")
 			print(lapply(saved_objects, function(x) head(x, 50)))
 		} else {
 			saveRDS(saved_objects, file = paste0(file_name, ".rds"))
