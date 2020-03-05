@@ -43,7 +43,7 @@ ui <- fluidPage(
 # ============================ Define server logic =============================
 server <- function(input, output, session) {
 	# Initializing values
-	decisions <- reactiveValues(series = NULL, latest = NULL)  # all judgements
+	decisions <- reactiveValues(series = NULL, latest = NULL)  # judgements (Y)
 	model <- reactiveValues(start = NULL, previous = NULL, latest = NULL)
 	X <- reactiveVal()
 
@@ -77,7 +77,7 @@ server <- function(input, output, session) {
 				# First turn of second round
 				model$start <- model_fit(
 					Xtrain = as.matrix(Xtrain_permutated),
-					ytrain = as.matrix(decisions$series)
+					ytrain = as.matrix(decisions$series[seq_len(n_init)])
 				)
 				model$previous <- model$start
 				message("Initial model:")
@@ -110,12 +110,8 @@ server <- function(input, output, session) {
 	observeEvent(input$realistic, {
 		# Record latest decision
 		decisions$latest <- 1
+		decisions$series <- append(decisions$series, 1)
 
-		# Append latest decision to the archive
-		if (!i$round1over) {
-			# Decision log is only populated during round 1
-			decisions$series <- append(decisions$series, 1)
-		}
 		if (!i$round1over | !i$round2over) {
 			i$i <- i$i + 1
 		}
@@ -123,12 +119,8 @@ server <- function(input, output, session) {
 	observeEvent(input$unrealistic, {
 		# Record latest decision
 		decisions$latest <- 0
+		decisions$series <- append(decisions$series, 0)
 
-		# Append latest decision to the archive
-		if (!i$round1over) {
-			# Decision log is only populated during round 1
-			decisions$series <- append(decisions$series, 0)
-		}
 		if (!i$round1over | !i$round2over) {
 			i$i <- i$i + 1
 		}
