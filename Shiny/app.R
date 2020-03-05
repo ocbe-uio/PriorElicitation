@@ -49,7 +49,7 @@ server <- function(input, output, session) {
 	# Initializing values
 	decisions <- reactiveValues(series = NULL, latest = NULL)  # judgements (Y)
 	model <- reactiveValues(start = NULL, previous = NULL, latest = NULL)
-	X <- reactiveVal()
+	X <- reactiveValues(latest = NULL)
 
 	sim_result <- reactiveValues(series = NULL, latest = NULL)
 
@@ -76,8 +76,8 @@ server <- function(input, output, session) {
 	output$ss <- renderText({
 		if (i$i <= n_init) {
 			# First round
-			X <- get_X()
-			sim_result$latest <- gen_sim(X)
+			X$latest <- get_X()
+			sim_result$latest <- gen_sim(X$latest)
 		} else if (i$i <= n_tot) {
 			# Second round
 			i$round1over <- TRUE
@@ -90,24 +90,24 @@ server <- function(input, output, session) {
 				model$previous <- model$start
 				message("Initial model:")
 				print(model$previous)
-				X <- get_X()
+				X$latest <- get_X()
 			} else {
-				X <- get_X()
-				cat("X = ", X, "\n")
+				X$latest <- get_X()
+				cat("X = ", X$latest, "\n")
 				model$latest <- model_update(
-					model$previous, X, as.matrix(decisions$latest), i$i,
+					model$previous, X$latest, as.matrix(decisions$latest), i$i,
 					n_opt
 				)
 				# TODO: update previous model with latest
 				if (debug) {
 					message(
-						"Retrained model given X = ", X,
+						"Retrained model given X = ", X$latest,
 						" and decision ", decisions$latest, ":"
 					)
 					print(model$latest)
 				}
 			}
-			sim_result$latest <- gen_sim(X)
+			sim_result$latest <- gen_sim(X$latest)
 		} else {
 			i$round2over <- TRUE
 		}
