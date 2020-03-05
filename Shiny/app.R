@@ -47,6 +47,8 @@ server <- function(input, output, session) {
 	model <- reactiveValues(start = NULL, previous = NULL, latest = NULL)
 	X <- reactiveVal()
 
+	sim_result <- reactiveValues(series = NULL, latest = NULL)
+
 	## Misc. counters
 	i <- reactiveValues(
 		i = 1, round1over = FALSE, round2over = FALSE
@@ -69,7 +71,7 @@ server <- function(input, output, session) {
 	output$ss <- renderText({
 		if (i$i <= n_init) {
 			# First round
-			gen_sim(get_X())
+			sim_result$latest <- gen_sim(get_X())
 		} else if (i$i <= n_tot) {
 			# Second round
 			i$round1over <- TRUE
@@ -114,6 +116,7 @@ server <- function(input, output, session) {
 
 		if (!i$round1over | !i$round2over) {
 			i$i <- i$i + 1
+			sim_result$series <- append(sim_result$series, sim_result$latest)
 		}
 	})
 	observeEvent(input$unrealistic, {
@@ -123,6 +126,7 @@ server <- function(input, output, session) {
 
 		if (!i$round1over | !i$round2over) {
 			i$i <- i$i + 1
+			sim_result$series <- append(sim_result$series, sim_result$latest)
 		}
 	})
 
