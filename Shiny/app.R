@@ -166,10 +166,15 @@ server <- function(input, output, session) {
 	# Saving output
 	session$onSessionEnded(function() {
 		saved_objects <- list(
-			"Xtrain"            = isolate(Xtrain),
-			"Xtrain_permutated" = isolate(Xtrain_permutated),
-			"decisions"         = isolate(decisions$series),
-			"final_model"       = isolate(model$latest)
+			"gpy_params" = isolate(model$latest$param_array),
+			"theta_acquisitions" = isolate(model$latest$X), # FIXME: 22, not 100
+			"label_acquisitions" = isolate(decisions$series),
+			"theta_grid" = NULL,
+			"lik_proxy" = NULL,
+			"post_proxy" = isolate(calc_post_proxy(model$latest)),
+			"mean_pred_grid" = NULL,
+			"var_pred_grid" = NULL,
+			"simulations" = isolate(sim_result$series)
 		)
 		machine_name <- system("uname -n", intern=TRUE)
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
