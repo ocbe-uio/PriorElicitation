@@ -9,7 +9,11 @@ source_python("../src/initialObjects.py")
 debug <- TRUE
 
 # Randomizing X
-Xtrain_permutated <- sample(Xtrain)
+if (debug) {
+	Xtrain_permutated <- Xtrain # not rearranging X makes debugging easier
+} else {
+	Xtrain_permutated <- sample(Xtrain)
+}
 
 # =========================== Define user interface ============================
 ui <- fluidPage(
