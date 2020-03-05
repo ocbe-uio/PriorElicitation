@@ -55,6 +55,7 @@ server <- function(input, output, session) {
 	)
 
 	get_X <- reactive({
+		# Function to retrieve the thetas (Xs) depending on which stage we are
 		if (i$i <= n_init) {
 			# First round
 			Xtrain_permutated[i$i]
@@ -79,7 +80,7 @@ server <- function(input, output, session) {
 				# First turn of second round
 				model$start <- model_fit(
 					Xtrain = as.matrix(Xtrain_permutated),
-					ytrain = as.matrix(decisions$series[seq_len(n_init)])
+					ytrain = as.matrix(decisions$series)
 				)
 				model$previous <- model$start
 				message("Initial model:")
@@ -94,7 +95,6 @@ server <- function(input, output, session) {
 				)
 				# TODO: update previous model with latest
 				if (debug) {
-					cat("X = ", X, "\n")
 					message(
 						"Retrained model given X = ", X,
 						" and decision ", decisions$latest, ":"
@@ -180,8 +180,8 @@ server <- function(input, output, session) {
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
 		file_name <- paste("Results", machine_name, date_time, sep="_")
 		if (debug) {
-			message("Structure of the exported list:")
-			print(str(saved_objects))
+			message("Exported list:")
+			print(saved_objects)
 		} else {
 			saveRDS(saved_objects, file = paste0(file_name, ".rds"))
 		}
