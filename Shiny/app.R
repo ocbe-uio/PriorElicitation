@@ -6,7 +6,7 @@ source_python("../src/initialObjects.py")
 source_python("../src/functions.py")
 
 # Manual debugging switch
-debug <- TRUE
+debug <- FALSE
 
 # Randomizing X
 if (debug) {
@@ -94,6 +94,7 @@ server <- function(input, output, session) {
 		i$i <- i$i + 1
 		if (i$i <= n_tot) {
 			X$latest <- get_X()
+			if (debug) print(X$latest)
 			X$series <- append(X$series, X$latest)
 			sim_result$latest <- gen_sim(X$latest)
 			sim_result$series <- append(sim_result$series, sim_result$latest)
@@ -180,6 +181,12 @@ server <- function(input, output, session) {
 		if (debug) {
 			cat("Exported list structure:\n")
 			print(str(saved_objects))
+			lapply(saved_objects, summary)
+			print(cbind(
+				saved_objects$theta_acquisitions,
+				saved_objects$label_acquisitions
+			))
+			browser()
 		} else {
 			saveRDS(saved_objects, file = paste0(file_name, ".rds"))
 		}
