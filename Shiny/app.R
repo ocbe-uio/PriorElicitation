@@ -50,7 +50,7 @@ server <- function(input, output, session) {
 	decisions <- reactiveValues(series = NULL, latest = NULL)  # judgements (Y)
 	model <- reactiveValues(start = NULL, previous = NULL, latest = NULL)
 	X <- reactiveValues(series = NULL, latest = NULL)
-
+	proxy <- reactiveValues(lik = 0, post = 0)
 	sim_result <- reactiveValues(series = NULL, latest = NULL)
 
 	## Misc. counters
@@ -138,17 +138,19 @@ server <- function(input, output, session) {
 		}
 	})
 
-	output$post_proxy <- renderImage({
-		if  (!i$round1over | !i$round2over) {
-			# Round 1 or round 2 ongoing
-			post_proxy <- 0
-		} else {
-			# Both rounds are over
-			post_proxy <- calc_post_proxy(model$latest)
+	# Calculating lik_proxy and post_proxy
+	observe({
+		if (i$round1over & i$round2over) {
+			proxy$lik <- calc_lik_proxy(model$latest)
+			proxy$post <- calc_post_proxy(proxy$lik)
 		}
+	})
+
+	# Final plot of post_proxy
+	output$post_proxy <- renderImage({
 		outfile <- tempfile(fileext = '.png')
 		png(outfile, width=400, height=400)
-		plot(post_proxy)
+		plot(proxy$post)
 		dev.off()
 
 		list(src = outfile, alt = "There should be a plot here")
@@ -180,8 +182,8 @@ server <- function(input, output, session) {
 			"theta_acquisitions" = isolate(X$series), # TODO: must match m.X
 			"label_acquisitions" = isolate(decisions$series), # TODO: must match m.Y
 			"theta_grid" = Xgrid,
-			"lik_proxy" = NULL,
-			"post_proxy" = isolate(calc_post_proxy(model$latest)),
+			"lik_proxy" = isolate(proxy$lik),
+			"post_proxy" = isolate(proxy$post),
 			"mean_pred_grid" = NULL,
 			"var_pred_grid" = NULL,
 			"simulations" = isolate(sim_result$series)
