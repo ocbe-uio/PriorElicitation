@@ -165,3 +165,7 @@ def calc_lik_proxy(m, Xgrid=Xgrid):
 def calc_post_proxy(lik_proxy):
     post_proxy = lik_proxy / (np.sum(lik_proxy * 0.01))
     return(post_proxy)
+
+def calc_pred_f(m, Xgrid=Xgrid):
+    pred_f = m.predict_noiseless(Xgrid)
+    return(pred_f)
