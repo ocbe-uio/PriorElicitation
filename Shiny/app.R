@@ -55,12 +55,6 @@ server <- function(input, output, session) {
 	proxy <- reactiveValues(lik = 0, post = 0, pred_f = NULL)
 	i <- reactiveValues(i = 0, round1over = FALSE, round2over = FALSE)
 
-	# Defining current round
-	# observe({
-	# 	if (i$i > n_init & i$i <= n_tot) i$round1over <- TRUE
-	# 	if (i$i > n_tot) i$round2over <- TRUE
-	# })
-
 	# Creating function to fit model
 	fit_model <- reactive({
 		if (i$i > n_init) {
@@ -77,8 +71,6 @@ server <- function(input, output, session) {
 					i$i, n_opt
 				)
 			}
-		} else {
-			NULL
 		}
 	})
 
@@ -93,9 +85,6 @@ server <- function(input, output, session) {
 			model$fit <- fit_model()
 			if (debug) print(model$fit)
 			acquire_X(model$fit)
-		} else {
-			# Experiment over
-			0
 		}
 	})
 
@@ -132,43 +121,43 @@ server <- function(input, output, session) {
 		}
 	})
 
-	# Calculating lik_proxy and post_proxy (after experiment is over)
+	# Final calculations
 	observe({
 		if (i$i > n_tot) {
+			# Calculating lik_proxy and post_proxy (after experiment is over)
 			proxy$lik <- calc_lik_proxy(model$fit)
 			proxy$post <- calc_post_proxy(proxy$lik)
 			proxy$pred_f <- calc_pred_f(model$fit)
-		}
-	})
 
-	# Final plot of post_proxy
-	output$post_proxy <- renderImage({
-		outfile <- tempfile(fileext = '.png')
-		png(outfile, width=400, height=400)
-		plot(proxy$post)
-		dev.off()
+			# Final plot of post_proxy
+			output$post_proxy <- renderImage({
+				outfile <- tempfile(fileext = '.png')
+				png(outfile, width=400, height=400)
+				plot(proxy$post)
+				dev.off()
 
-		list(src = outfile, alt = "There should be a plot here")
-	}, deleteFile = TRUE)
+				list(src = outfile, alt = "There should be a plot here")
+			}, deleteFile = TRUE)
 
-	# Final link
-	url <- a("CLICK HERE", href="http://www.uio.no")
-	output$final_link <- renderUI({
-		if (i$i > n_tot) {
-			tagList(
-				"Thank you for your contribution! Please", url,
-				"to submit your results and conclude your participation."
-			)
-		} else {
-			NULL
+			# Final link
+			url <- a("CLICK HERE", href="http://www.uio.no")
+			output$final_link <- renderUI({
+				if (i$i > n_tot) {
+					tagList(
+						"Thank you for your contribution! Please", url,
+						"to submit your results",
+						"and conclude your participation."
+					)
+				} else {
+					NULL
+				}
+			})
 		}
 	})
 
 	# Controls for development
 	output$i <- renderText(i$i)
 	output$ss <- renderText(sim_result$latest)
-	# output$r1ovr <- renderText(i$i > n_init)
-	# output$r2ovr <- renderText(i$i > n_tot)
 
 	# Saving output
 	session$onSessionEnded(function() {
@@ -191,7 +180,6 @@ server <- function(input, output, session) {
 		if (debug) {
 			cat("Exported list structure:\n")
 			print(str(saved_objects))
-			# print(lapply(saved_objects, function(x) head(x, 50)))
 		} else {
 			saveRDS(saved_objects, file = paste0(file_name, ".rds"))
 		}

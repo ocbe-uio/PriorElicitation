@@ -131,7 +131,7 @@ def model_update(m, X_acq, y_acq, i, n_opt):
     lik_link = GPy.likelihoods.Bernoulli(gp_link=logit_link)
     laplace_inf = GPy.inference.latent_function_inference.Laplace()
 
-    # X and Y
+    # Creating X and Y with the historical values (m.*) + the latest (acq)
     x = np.r_[m.X, X_acq]
     y = np.r_[m.Y, y_acq]
 
