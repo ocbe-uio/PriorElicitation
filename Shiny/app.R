@@ -56,6 +56,12 @@ server <- function(input, output, session) {
 	## Misc. counters
 	i <- reactiveValues(i = 1, round1over = FALSE, round2over = FALSE)
 
+	# Defining current round
+	observe({
+		if (i$i > n_init & i$i <= n_tot) i$round1over <- TRUE
+		if (i$i > n_tot) i$round2over <- TRUE
+	})
+
 	get_X <- reactive({
 		# Function to retrieve the thetas (Xs) depending on which stage we are
 		if (i$i <= n_init) {
@@ -70,7 +76,7 @@ server <- function(input, output, session) {
 		}
 	})
 
-	# Simulating values for judgement (ss)
+	# Updating theta (X) and simulating values for judgement (ss) given X
 	output$ss <- renderText({
 		if (i$i <= n_init) {
 			# First round
@@ -78,7 +84,6 @@ server <- function(input, output, session) {
 			sim_result$latest <- gen_sim(X$latest)
 		} else if (i$i <= n_tot) {
 			# Second round
-			i$round1over <- TRUE
 			if (i$i == n_init + 1) {
 				# First turn of second round
 				model$start <- model_fit(
@@ -107,8 +112,6 @@ server <- function(input, output, session) {
 				}
 			}
 			sim_result$latest <- gen_sim(X$latest)
-		} else {
-			i$round2over <- TRUE
 		}
 	})
 
