@@ -62,6 +62,28 @@ server <- function(input, output, session) {
 		if (i$i > n_tot) i$round2over <- TRUE
 	})
 
+	# Creating function to fit model
+	fit_model <- reactive({
+		if (i$round1over) {
+			if (i$i == n_init + 1) {
+				model_fit(
+					as.matrix(Xtrain_permutated),
+					as.matrix(decisions$series)
+				)
+			} else {
+				model_update(
+					model$previous,
+					as.matrix(X$latest),
+					as.matrix(decisions$latest), 
+					i$i, n_opt
+				)
+			}
+		} else {
+			NULL
+		}
+	})
+
+	# Creating function to retrieve theta (X)
 	get_X <- reactive({
 		# Function to retrieve the thetas (Xs) depending on which stage we are
 		if (i$i <= n_init) {
@@ -86,22 +108,15 @@ server <- function(input, output, session) {
 			# Second round
 			if (i$i == n_init + 1) {
 				# First turn of second round
-				model$start <- model_fit(
-					Xtrain = as.matrix(Xtrain_permutated),
-					ytrain = as.matrix(decisions$series)
-				)
-				model$previous <- model$start
 				message("Initial model:")
 				print(model$previous)
+				model$previous <- fit_model()
 				X$latest <- get_X()
 				gen_sim(X$latest)
 			} else {
 				X$latest <- get_X()
 				cat("X = ", X$latest, "\n")
-				model$latest <- model_update(
-					model$previous, as.matrix(X$series),
-					as.matrix(decisions$series), i$i, n_opt
-				)
+				model$latest <- fit_model()
 				# TODO: update previous model with latest
 				if (debug) {
 					message(
