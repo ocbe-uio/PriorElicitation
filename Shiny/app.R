@@ -2,8 +2,8 @@ library(shiny)
 library(reticulate)
 
 # ============== Initialize Python and R constants and functions ===============
-source_python("../src/functions.py")
 source_python("../src/initialObjects.py")
+source_python("../src/functions.py")
 
 # Manual debugging switch
 debug <- TRUE
@@ -178,7 +178,7 @@ server <- function(input, output, session) {
 			# when the model updates are fixed
 			"theta_acquisitions" = isolate(X$series), # TODO: must match m.X
 			"label_acquisitions" = isolate(decisions$series), # TODO: must match m.Y
-			"theta_grid" = NULL,
+			"theta_grid" = Xgrid,
 			"lik_proxy" = NULL,
 			"post_proxy" = isolate(calc_post_proxy(model$latest)),
 			"mean_pred_grid" = NULL,
