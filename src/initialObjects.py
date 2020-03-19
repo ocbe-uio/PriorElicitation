@@ -9,3 +9,4 @@ n_opt = 5
 plotting = False
 simulations = []
 Xtrain = np.expand_dims(np.linspace(0, 1, n_init), axis=1)
+Xgrid = np.expand_dims(np.linspace(0, 1, 2001), axis=1)

@@ -147,8 +147,7 @@ def model_update(m, X_acq, y_acq, i, n_opt):
     return(m)
 
 
-def acquire_X(m, acq_noise=0.1):
-    Xgrid = np.expand_dims(np.linspace(0, 1, 2001), axis=1)
+def acquire_X(m, Xgrid=Xgrid, acq_noise=0.1):
 
     # for i in range(n_update):
     thisXgrid = Xgrid.copy()
@@ -159,10 +158,14 @@ def acquire_X(m, acq_noise=0.1):
     X_acq = min(max(X_acq, 0 * X_acq), X_acq / X_acq)
     return(X_acq)
 
-
-def calc_post_proxy(m):
-    Xgrid = np.expand_dims(np.linspace(0, 1, 2001), axis=1)
+def calc_lik_proxy(m, Xgrid=Xgrid):
     lik_proxy = np.exp(m.predict_noiseless(Xgrid)[0])
+    return(lik_proxy)
 
-    post_proxy = lik_proxy / (np.sum(lik_proxy*0.01))
+def calc_post_proxy(lik_proxy):
+    post_proxy = lik_proxy / (np.sum(lik_proxy * 0.01))
     return(post_proxy)
+
+def calc_pred_f(m, Xgrid=Xgrid):
+    pred_f = m.predict_noiseless(Xgrid)
+    return(pred_f)
