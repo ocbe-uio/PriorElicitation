@@ -54,9 +54,7 @@ server <- function(input, output, session) {
 	sim_result <- reactiveValues(series = NULL, latest = NULL)
 
 	## Misc. counters
-	i <- reactiveValues(
-		i = 1, round1over = FALSE, round2over = FALSE
-	)
+	i <- reactiveValues(i = 1, round1over = FALSE, round2over = FALSE)
 
 	get_X <- reactive({
 		# Function to retrieve the thetas (Xs) depending on which stage we are
@@ -156,6 +154,7 @@ server <- function(input, output, session) {
 		list(src = outfile, alt = "There should be a plot here")
 	}, deleteFile = TRUE)
 
+	# Final link
 	url <- a("CLICK HERE", href="http://www.uio.no")
 	output$final_link <- renderUI({
 		if (i$round1over & i$round2over) {
@@ -192,8 +191,9 @@ server <- function(input, output, session) {
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
 		file_name <- paste("Results", machine_name, date_time, sep="_")
 		if (debug) {
-			cat("Exported list:\n")
-			print(lapply(saved_objects, function(x) head(x, 50)))
+			cat("Exported list structure:\n")
+			print(str(saved_objects))
+			# print(lapply(saved_objects, function(x) head(x, 50)))
 		} else {
 			saveRDS(saved_objects, file = paste0(file_name, ".rds"))
 		}
