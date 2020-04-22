@@ -1,3 +1,3 @@
 app.R
-../src/functions.py
-../src/initialObjects.py
+functions.py
+initialObjects.py
