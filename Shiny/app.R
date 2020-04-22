@@ -1,9 +1,12 @@
-library(shiny)
 library(reticulate)
+library(shiny)
+
+virtualenv_install("pyenv", packages = c('numpy', 'Gpy'))
+use_virtualenv("pyenv", required = TRUE)
 
 # ============== Initialize Python and R constants and functions ===============
-source_python("../src/initialObjects.py")
-source_python("../src/functions.py")
+source_python("initialObjects.py")
+source_python("functions.py")
 
 # Manual debugging switch
 debug <- FALSE
@@ -186,7 +189,7 @@ server <- function(input, output, session) {
 				saved_objects$theta_acquisitions,
 				saved_objects$label_acquisitions
 			))
-			browser()
+			# browser()
 		} else {
 			saveRDS(saved_objects, file = paste0(file_name, ".rds"))
 		}
