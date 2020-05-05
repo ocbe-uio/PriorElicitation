@@ -1,9 +1,15 @@
-library(reticulate)
+# Sys.setenv(RETICULATE_PYTHON = "~/.virtualenvs/elicit/bin/python3")
+
+# reticulate::use_python("~/.virtualenvs/elicit/bin/python3")
+# reticulate::virtualenv_create(envname = "elicit", python = "python3")
+
+#library(reticulate)
 library(shiny)
 
-# virtualenv_create(envname = "elicit", python="python3")
-# virtualenv_install("elicit", packages = c('pip', 'numpy', 'Gpy'))
-# use_virtualenv("elicit", required = TRUE)
+# reticulate::use_virtualenv("elicit", required = TRUE)
+#virtualenv_install("base", packages = c('numpy', 'Gpy'), ignore_installed = TRUE)
+#py_install("numpy")
+#py_install("Gpy")
 
 # ============== Initialize Python and R constants and functions ===============
 # source_python("initialObjects.py")
