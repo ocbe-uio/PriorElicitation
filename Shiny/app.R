@@ -1,31 +1,34 @@
-# Sys.setenv(RETICULATE_PYTHON = "~/.virtualenvs/elicit/bin/python3")
-
-# reticulate::use_python("~/.virtualenvs/elicit/bin/python3")
-# reticulate::virtualenv_create(envname = "elicit", python = "python3")
-
-#library(reticulate)
+library(reticulate)
 library(shiny)
+virtualenv_create(
+	envname = "python_environment",
+	python  = "python3"
+)
+# ==============================================================================
+# Purging old pip and explicitly installing a new one
+# ==============================================================================
 
-# reticulate::use_virtualenv("elicit", required = TRUE)
-#virtualenv_install("base", packages = c('numpy', 'Gpy'), ignore_installed = TRUE)
-#py_install("numpy")
-#py_install("Gpy")
-
+virtualenv_install(
+	envname          = "python_environment",
+	packages         = c("numpy", "GPy", "matplotlib")
+)
+# ==============================================================================
+# Starting the virtual environment
+# ==============================================================================
+use_virtualenv("python_environment", required = TRUE)
 # ============== Initialize Python and R constants and functions ===============
-# source_python("initialObjects.py")
-# source_python("functions.py")
-# py_run_file("initialObjects.py")
-# py_run_file("functions.py")
+source_python("initialObjects.py")
+source_python("functions.py")
 
 # Manual debugging switch
-# debug <- FALSE
+debug <- FALSE
 
 # # Randomizing X
-# if (debug) {
-# 	Xtrain_permutated <- Xtrain # not rearranging X makes debugging easier
-# } else {
-# 	Xtrain_permutated <- sample(Xtrain)
-# }
+if (debug) {
+	Xtrain_permutated <- Xtrain # not rearranging X makes debugging easier
+} else {
+	Xtrain_permutated <- sample(Xtrain)
+}
 
 # =========================== Define user interface ============================
 ui <- fluidPage(
