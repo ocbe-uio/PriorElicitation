@@ -1,14 +1,29 @@
-library(shiny)
 library(reticulate)
+library(shiny)
+virtualenv_create(
+	envname = "python_environment",
+	python  = "python3"
+)
+# ==============================================================================
+# Purging old pip and explicitly installing a new one
+# ==============================================================================
 
+virtualenv_install(
+	envname          = "python_environment",
+	packages         = c("numpy", "GPy", "matplotlib")
+)
+# ==============================================================================
+# Starting the virtual environment
+# ==============================================================================
+use_virtualenv("python_environment", required = TRUE)
 # ============== Initialize Python and R constants and functions ===============
-source_python("../src/initialObjects.py")
-source_python("../src/functions.py")
+source_python("initialObjects.py")
+source_python("functions.py")
 
 # Manual debugging switch
 debug <- FALSE
 
-# Randomizing X
+# # Randomizing X
 if (debug) {
 	Xtrain_permutated <- Xtrain # not rearranging X makes debugging easier
 } else {
@@ -67,7 +82,7 @@ server <- function(input, output, session) {
 				model_update(
 					model$fit,
 					as.matrix(X$latest),
-					as.matrix(decisions$latest), 
+					as.matrix(decisions$latest),
 					i$i, n_opt
 				)
 			}
@@ -186,7 +201,7 @@ server <- function(input, output, session) {
 				saved_objects$theta_acquisitions,
 				saved_objects$label_acquisitions
 			))
-			browser()
+			# browser()
 		} else {
 			saveRDS(saved_objects, file = paste0(file_name, ".rds"))
 		}
