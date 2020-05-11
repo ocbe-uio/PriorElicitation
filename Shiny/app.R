@@ -47,12 +47,15 @@ ui <- fluidPage(
 			)
 		),
 		mainPanel(
-			actionLink("start", "Click here to start"), br(),
-			"Peeking under the hood for development purposes...", br(),
-			"i: ", textOutput("i"),
-			"ss: ", textOutput("ss"),
-			"post_proxy: ", plotOutput("post_proxy"),
-			h2(uiOutput("final_link"))
+			tabsetPanel(type = "tabs",
+				tabPanel("Veri-PRECIOUS",
+					actionLink("start", "Click here to start"), br(),
+					fluidRow(column(2, "Round: "), column(3, textOutput("i"))),
+					"Value: ", h1(textOutput("ss")),
+					h2(uiOutput("final_link"))
+				),
+				tabPanel("Pari-Precious")
+			)
 		)
 	)
 )
