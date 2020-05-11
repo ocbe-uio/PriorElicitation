@@ -1,20 +1,17 @@
 library(reticulate)
 library(shiny)
+library(rdrop2)
+# ==============================================================================
+# Starting the virtual environment
+# ==============================================================================
 virtualenv_create(
 	envname = "python_environment",
 	python  = "python3"
 )
-# ==============================================================================
-# Purging old pip and explicitly installing a new one
-# ==============================================================================
-
 virtualenv_install(
 	envname          = "python_environment",
 	packages         = c("numpy", "GPy", "matplotlib")
 )
-# ==============================================================================
-# Starting the virtual environment
-# ==============================================================================
 use_virtualenv("python_environment", required = TRUE)
 # ============== Initialize Python and R constants and functions ===============
 source_python("initialObjects.py")
@@ -192,7 +189,7 @@ server <- function(input, output, session) {
 		)
 		machine_name <- system("uname -n", intern=TRUE)
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
-		file_name <- paste("Results", machine_name, date_time, sep="_")
+		file_name <- paste("Results", date_time, machine_name, sep="_")
 		if (debug) {
 			cat("Exported list structure:\n")
 			print(str(saved_objects))
@@ -201,9 +198,9 @@ server <- function(input, output, session) {
 				saved_objects$theta_acquisitions,
 				saved_objects$label_acquisitions
 			))
-			# browser()
 		} else {
 			saveRDS(saved_objects, file = paste0(file_name, ".rds"))
+			drop_upload(paste0(file_name, ".rds"))
 		}
 		stopApp()
 	})

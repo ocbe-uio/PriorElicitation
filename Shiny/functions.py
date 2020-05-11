@@ -6,6 +6,7 @@ from GPy.likelihoods.link_functions import GPTransformation
 # from GPy.util.misc import safe_exp, safe_square, safe_cube, safe_quad,
 # safe_three_times
 
+
 def g_log(X):
     return 1./(1+np.exp(-X))
 
