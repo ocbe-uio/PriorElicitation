@@ -8,6 +8,8 @@ virtualenv_create(
 	envname = "python_environment",
 	python  = "python3"
 )
+virtualenv_remove(envname = "python_environment", packages = "pip")
+virtualenv_install(envname = "python_environment", packages = "pip")
 virtualenv_install(
 	envname          = "python_environment",
 	packages         = c(
