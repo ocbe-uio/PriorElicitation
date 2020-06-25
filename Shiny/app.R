@@ -159,6 +159,16 @@ server <- function(input, output, session) {
 		Xtrain <- init_X("veri")[1]
 		Xgrid <- init_X("veri")[2]
 	})
+	observeEvent(input$start_pari, {
+		init_grid_indices      <- init_X("pari")[1]
+		anti_init_grid_indices <- init_X("pari")[2]
+		Xtrain                 <- init_X("pari")[3]
+		X1train                <- init_X("pari")[4]
+		X2train                <- init_X("pari")[5]
+		X1traingrid            <- init_X("pari")[6]
+		X2traingrid            <- init_X("pari")[7]
+		Xtrain                 <- init_X("pari")[8]
+	})
 	observeEvent(input$realistic, {
 		if (i$i <= n_tot) {
 			# Record latest decision
