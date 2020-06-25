@@ -2,6 +2,10 @@ library(reticulate)
 library(shiny)
 library(rdrop2)
 
+# Manual debugging switch ====================================================
+
+debug <- TRUE
+
 # Starting the virtual environment ===========================================
 
 virtualenv_create(
@@ -24,18 +28,6 @@ use_virtualenv("python_environment", required = TRUE)
 source_python("initialObjects.py")
 source_python("functions-veri.py")
 source_python("functions-pari.py")
-
-# Manual debugging switch ----------------------------------------------------
-
-debug <- TRUE
-
-# Randomizing X --------------------------------------------------------------
-
-if (debug) {
-	Xtrain_permutated <- Xtrain # not rearranging X makes debugging easier
-} else {
-	Xtrain_permutated <- sample(Xtrain)
-}
 
 # Defining user interface ====================================================
 
@@ -89,6 +81,8 @@ ui <- fluidPage(
 				tabPanel(
 					"Pari-Precious",
 					actionLink("start_pari", "Click here to start"), br(),
+					plotOutput("barplot_left"),
+					plotOutput("barplot_right")
 				)
 			)
 		)
@@ -98,20 +92,59 @@ ui <- fluidPage(
 # Define server logic ========================================================
 
 server <- function(input, output, session) {
-	# Initializing reactive values
+	# Initializing reactive values -------------------------------------------
 	sim_result <- reactiveValues(series = NULL, latest = NULL)
 	decisions <- reactiveValues(series = NULL, latest = NULL)  # judgements (Y)
-	X <- reactiveValues(series = NULL, latest = NULL)  # theta
+	X <- reactiveValues(
+		permutated = NULL, series = NULL, latest = NULL, grid = NULL,
+		plots_heights = list(0, 0)
+	) # theta
 	model <- reactiveValues(fit = NULL)
 	proxy <- reactiveValues(lik = 0, post = 0, pred_f = NULL)
 	i <- reactiveValues(i = 0, round1over = FALSE, round2over = FALSE)
+
+	# Starting Veri or Pari-PRECIOUS -----------------------------------------
+	observeEvent(input$start_veri, {
+		init_x_values <- init_X("veri")
+		Xtrain <- init_x_values[[1]]
+		X$grid  <- init_x_values[[2]]
+		if (i$i == 0) {
+			if (debug) {
+				# not rearranging X makes debugging easier
+				X$permutated <- Xtrain
+			} else {
+				X$permutated <- sample(Xtrain)
+			}
+			generate_X_ss()
+		}
+	})
+	observeEvent(input$start_pari, {
+		init_x_values <- init_X("pari")
+		init_grid_indices      <- init_x_values[[1]]
+		anti_init_grid_indices <- init_x_values[[2]]
+		Xtrain                 <- init_x_values[[3]]
+		X1train                <- init_x_values[[4]]
+		X2train                <- init_x_values[[5]]
+		X1traingrid            <- init_x_values[[6]]
+		X2traingrid            <- init_x_values[[7]]
+		Xtrain                 <- init_x_values[[8]]
+		if (i$i == 0) {
+			if (debug) {
+				# not rearranging X makes debugging easier
+				X$permutated <- Xtrain
+			} else {
+				X$permutated <- sample(Xtrain)
+			}
+			X$plots_heights <- generate_X_plots_heights()
+		}
+	})
 
 	# Creating function to fit model -----------------------------------------
 	fit_model <- reactive({
 		if (i$i > n_init) {
 			if (i$i == n_init + 1) {
 				model_fit(
-					as.matrix(Xtrain_permutated),
+					as.matrix(X$permutated),
 					as.matrix(decisions$series)
 				)
 			} else {
@@ -129,16 +162,28 @@ server <- function(input, output, session) {
 
 	get_X <- reactive({
 		# Function to retrieve the thetas (Xs) depending on which stage we are
+		# Results of this function are one number
 		if (i$i <= n_init) {
 			# First round
-			Xtrain_permutated[i$i]
+			X$permutated[i$i]
 		} else if (i$i <= n_tot) {
 			# Second round
 			model$fit <- fit_model()
 			if (debug) print(model$fit)
-			acquire_X(model$fit)
+			acquire_X(model$fit, X$grid)
 		}
 	})
+
+	get_X_pairs <- reactive(({
+		# Results of this function are pairs of numbers
+		if (i$i <= n_init) {
+			# First round
+			X$permutated[i$i, ]
+		} else if (i$i <= n_tot) {
+			# Second round
+			stop("Under construction")
+		}
+	}))
 
 	# generating X, simulating value, updating model -------------------------
 
@@ -153,12 +198,15 @@ server <- function(input, output, session) {
 		}
 	})
 
-	# Basic reactions to buttons (i.e., starting, recording judgements) ------
-	observeEvent(input$start_veri, {
-		if (i$i == 0) generate_X_ss()
-		Xtrain <- init_X("veri")[1]
-		Xgrid <- init_X("veri")[2]
+	generate_X_plots_heights <- reactive({
+		i$i <- i$i + 1
+		if (i$i <= n_tot) {
+			X$latest <- get_X_pairs()
+			gen_X_plots_values(X$latest)
+		}
 	})
+
+	# Recording judgements ---------------------------------------------------
 	observeEvent(input$realistic, {
 		if (i$i <= n_tot) {
 			# Record latest decision
@@ -175,15 +223,16 @@ server <- function(input, output, session) {
 			generate_X_ss()
 		}
 	})
+	# TODO: add input$choose_left and input$choose_right
 
 	# Final calculations -----------------------------------------------------
 
 	observe({
 		if (i$i > n_tot) {
 			# Calculating lik_proxy and post_proxy (after experiment is over)
-			proxy$lik <- calc_lik_proxy(model$fit)
+			proxy$lik <- calc_lik_proxy(model$fit, X$grid)
 			proxy$post <- calc_post_proxy(proxy$lik)
-			proxy$pred_f <- calc_pred_f(model$fit)
+			proxy$pred_f <- calc_pred_f(model$fit, X$grid)
 
 			# Final plot of post_proxy
 			output$post_proxy <- renderImage({
@@ -215,6 +264,19 @@ server <- function(input, output, session) {
 
 	output$i <- renderText(i$i)
 	output$ss <- renderText(sim_result$latest)
+	# TODO: randomize order of 1 and 2 below
+	output$barplot_left <- renderPlot({
+		barplot(
+			height = X$plots_heights[[1]],
+			names.arg = seq_along(X$plots_heights[[1]])
+		)
+	})
+	output$barplot_right <- renderPlot({
+		barplot(
+			height = X$plots_heights[[2]],
+			names.arg = seq_along(X$plots_heights[[2]])
+		)
+	})
 
 	# Saving output ----------------------------------------------------------
 
@@ -225,7 +287,7 @@ server <- function(input, output, session) {
 			# when the model updates are fixed
 			"theta_acquisitions" = isolate(X$series), # TODO: must match m.X
 			"label_acquisitions" = isolate(decisions$series), # TODO: must match m.Y
-			"theta_grid" = Xgrid,
+			"theta_grid" = isolate(X$grid),
 			"lik_proxy" = isolate(proxy$lik),
 			"post_proxy" = isolate(proxy$post),
 			"mean_pred_grid" = isolate(proxy$pred_f[[1]]),

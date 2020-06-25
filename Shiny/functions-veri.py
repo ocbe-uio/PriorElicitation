@@ -45,7 +45,6 @@ class Logit(GPTransformation):
         input_dict["class"] = "GPy.likelihoods.link_functions.Logit"
         return input_dict
 
-
 def bo_acquisition(m, X):
     pred_f = m.predict_noiseless(X)
     acquisition_f = pred_f[0] + 2. * np.sqrt(pred_f[1])
@@ -98,7 +97,6 @@ def plotting(Xtrain, ytrain, pred_f, Xgrid, lik_proxy, post_proxy, m, stage=1):
         plt.scatter(m.X, m.Y)
         plt.show()
 
-
 def model_fit(Xtrain, ytrain):
     # Kernel
     kern = GPy.kern.Matern32(input_dim=1) \
@@ -146,8 +144,7 @@ def model_update(m, X_acq, y_acq, i, n_opt):
 
     return(m)
 
-
-def acquire_X(m, Xgrid=Xgrid, acq_noise=0.1):
+def acquire_X(m, Xgrid, acq_noise=0.1):
 
     # for i in range(n_update):
     thisXgrid = Xgrid.copy()
@@ -158,7 +155,7 @@ def acquire_X(m, Xgrid=Xgrid, acq_noise=0.1):
     X_acq = min(max(X_acq, 0 * X_acq), X_acq / X_acq)
     return(X_acq)
 
-def calc_lik_proxy(m, Xgrid=Xgrid):
+def calc_lik_proxy(m, Xgrid):
     lik_proxy = np.exp(m.predict_noiseless(Xgrid)[0])
     return(lik_proxy)
 
@@ -166,6 +163,6 @@ def calc_post_proxy(lik_proxy):
     post_proxy = lik_proxy / (np.sum(lik_proxy * 0.01))
     return(post_proxy)
 
-def calc_pred_f(m, Xgrid=Xgrid):
+def calc_pred_f(m, Xgrid):
     pred_f = m.predict_noiseless(Xgrid)
     return(pred_f)
