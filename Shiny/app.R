@@ -156,18 +156,20 @@ server <- function(input, output, session) {
 	# Basic reactions to buttons (i.e., starting, recording judgements) ------
 	observeEvent(input$start_veri, {
 		if (i$i == 0) generate_X_ss()
-		Xtrain <- init_X("veri")[1]
-		Xgrid <- init_X("veri")[2]
+		init_x_values <- init_X("veri")
+		Xtrain <- init_x_values[1]
+		Xgrid  <- init_x_values[2]
 	})
 	observeEvent(input$start_pari, {
-		init_grid_indices      <- init_X("pari")[1]
-		anti_init_grid_indices <- init_X("pari")[2]
-		Xtrain                 <- init_X("pari")[3]
-		X1train                <- init_X("pari")[4]
-		X2train                <- init_X("pari")[5]
-		X1traingrid            <- init_X("pari")[6]
-		X2traingrid            <- init_X("pari")[7]
-		Xtrain                 <- init_X("pari")[8]
+		init_x_values <- init_X("pari")
+		init_grid_indices      <- init_x_values[1]
+		anti_init_grid_indices <- init_x_values[2]
+		Xtrain                 <- init_x_values[3]
+		X1train                <- init_x_values[4]
+		X2train                <- init_x_values[5]
+		X1traingrid            <- init_x_values[6]
+		X2traingrid            <- init_x_values[7]
+		Xtrain                 <- init_x_values[8]
 	})
 	observeEvent(input$realistic, {
 		if (i$i <= n_tot) {
@@ -185,6 +187,7 @@ server <- function(input, output, session) {
 			generate_X_ss()
 		}
 	})
+	# TODO: add input$choose_left and input$choose_right
 
 	# Final calculations -----------------------------------------------------
 

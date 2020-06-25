@@ -98,7 +98,6 @@ def plotting(Xtrain, ytrain, pred_f, Xgrid, lik_proxy, post_proxy, m, stage=1):
         plt.scatter(m.X, m.Y)
         plt.show()
 
-
 def model_fit(Xtrain, ytrain):
     # Kernel
     kern = GPy.kern.Matern32(input_dim=1) \
@@ -145,7 +144,6 @@ def model_update(m, X_acq, y_acq, i, n_opt):
         m.optimize()
 
     return(m)
-
 
 def acquire_X(m, Xgrid=Xgrid, acq_noise=0.1):
 
