@@ -1,10 +1,10 @@
 from matplotlib import pyplot as plt
-# get_ipython().run_line_magic('matplotlib', 'inline')
+# get_ipython().run_line_magic('matplotlib', 'inline') # TODO: part of plotting. Remove?
 import sys
 import csv
 import numpy as np
 import GPy
-# from IPython.display import clear_output
+from IPython.display import clear_output
 from scipy.stats import norm
 # from GPy_logit_link import Logit, g_log
 
@@ -14,7 +14,6 @@ from scipy.stats import norm
 
 def sample_crp(alpha,theta,n):
     membership=[1]
-
     for i in range(1,n):
         probs=[(m-alpha)/(i+theta) for m in membership]+[(theta+len(membership)*alpha)/(i+theta)]
         newmember=np.random.multinomial(n=1,pvals=np.array(probs)).tolist()
@@ -25,49 +24,31 @@ def sample_crp(alpha,theta,n):
     membership.sort(reverse=True)
     return(membership)
 
-
-# In[39]:
-
-
-def y_sample(X):
-    loss=-((X+np.random.normal(0,0.1,np.shape(X)))**2)
-    probs=1./(1+np.exp(-loss))
-    y=np.random.binomial(n=1,p=probs)
-    return(y)
-
-
-# In[40]:
-
-
-def y_sample(X):
-    ss1=np.random.binomial(n=100,p=X[:,0:1])
-    ss2=np.random.binomial(n=100,p=X[:,1:2])
-    judgement=1.*(np.abs(ss1-50)<np.abs(ss2-50))
-    return(judgement)
-
-
 # In[41]:
 
 def y_input(X):
     judgement=np.zeros((np.shape(X)[0],1))
     for i in range(np.shape(X)[0]):
-        # clear_output() # ASK: necessary? IPython's been a pain
+        clear_output() # ASK: necessary? IPython's been a pain
         members_0=sample_crp(X[i,0],0.,100)
         members_1=sample_crp(X[i,1],0.,100)
         bin_rand=np.random.binomial(n=1,p=.5)
         if bin_rand:
+            # TODO: move to R?
             plt.subplot(1, 2, 1)
             plt.bar(height=members_1,x=range(len(members_1)))
             plt.subplot(1, 2, 2)
             plt.bar(height=members_0,x=range(len(members_0)))
             plt.show()
         else:
+            # TODO: move to R?
             plt.subplot(1, 2, 1)
             plt.bar(height=members_0,x=range(len(members_0)))
             plt.subplot(1, 2, 2)
             plt.bar(height=members_1,x=range(len(members_1)))
             plt.show()
-        judgement[i]=float(float(input())==bin_rand)
+        judgement[i]=float(float(input())==bin_rand) # FIXME: input() should ask for text input
+        # TODO: input() should come from Shiny
     return(judgement)
 
 
@@ -75,6 +56,7 @@ def y_input(X):
 
 
 def bo_acquisition(m,X):
+    # ASK: same as VERI. Remove?
     pred_f=m.predict_noiseless(X)
     acquisition_f=pred_f[0]+2.*np.sqrt(pred_f[1])#+np.random.normal(0,1e-3,np.shape(X))
     return(acquisition_f)
@@ -124,61 +106,34 @@ def dts_acquisition_X(m,X):
     #pred_noiseless_samples=np.random.multivariate_normal(mean=pred_noiseless_mean[:,0],cov=pred_noiseless_var,size=1000)
     pred_noiseless_samples=np.random.normal(size=(2601, 1000)) * np.sqrt(pred_noiseless_var) + pred_noiseless_mean
     pred_labels_samples= np.mean(g_log(pred_noiseless_samples),axis=1)
-
-
     n_this=int(np.sqrt(np.shape(X)[0]))
     pred_label=np.reshape(pred_labels_samples,(n_this,n_this))
     copeland=np.argmax(np.sum(pred_label,axis=0))
     acq_0=copeland
-
  #   plt.plot(np.sum(pred_label,axis=0))
-
     thisX1grid=np.reshape(X[:,1],(n_this,n_this))
     thisX0grid=np.reshape(X[:,0],(n_this,n_this))
     X_DTS_grid=np.concatenate((thisX0grid[copeland:copeland+1,:].T,thisX1grid[copeland,0]*np.ones((n_this,1))),axis=1)
     pred_DTS_mean,pred_DTS_var=m.predict_noiseless(X_DTS_grid,full_cov=True)
-
     DTS_samples=np.random.multivariate_normal(mean=pred_DTS_mean[:,0],cov=pred_DTS_var,size=500)
-
-
     DTS_samples_var=np.var(DTS_samples,axis=0)
     #plt.plot(DTS_samples_var)
     acq_1=np.argmax(DTS_samples_var)
     X_acq=np.concatenate((thisX0grid[acq_0:acq_0+1,acq_1:acq_1+1],thisX1grid[acq_0:acq_0+1,acq_1:acq_1+1]),axis=1)
   #  print("X_acq",X_acq)
-
    # plt.show()
    # input()
     return(X_acq)
 
 
 # TODO: No more functions. The rest is the script to be ported to R
-# In[48]:
 
-
-# n_init=5
-
-
-# In[49]:
-
-
-# init_grid_indices=np.triu_indices(n_init)
-# anti_init_grid_indices=np.tril_indices(n_init)
-
-
-# In[50]:
-
-
-#Xtrain=np.random.uniform(0,1,(n_init,1))
-# X1train=np.linspace(0,1,n_init)
-# X2train=np.linspace(0,1,n_init)
-# X1traingrid,X2traingrid=np.meshgrid(X1train, X2train)
-# Xtrain=np.concatenate((np.reshape(X1traingrid[init_grid_indices],(-1,1)),np.reshape(X2traingrid[init_grid_indices],(-1,1))),axis=1)
+# # In[50]:
 
 # ytrain=y_input(Xtrain)
 
 
-# # In[51]:
+# In[51]:
 
 
 # Xtrainmirror=np.concatenate((np.reshape(X2traingrid[init_grid_indices],(-1,1)),np.reshape(X1traingrid[init_grid_indices],(-1,1))),axis=1)
