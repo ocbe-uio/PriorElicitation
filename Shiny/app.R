@@ -2,6 +2,10 @@ library(reticulate)
 library(shiny)
 library(rdrop2)
 
+# Manual debugging switch ====================================================
+
+debug <- TRUE
+
 # Starting the virtual environment ===========================================
 
 virtualenv_create(
@@ -24,18 +28,6 @@ use_virtualenv("python_environment", required = TRUE)
 source_python("initialObjects.py")
 source_python("functions-veri.py")
 source_python("functions-pari.py")
-
-# Manual debugging switch ----------------------------------------------------
-
-debug <- TRUE
-
-# Randomizing X --------------------------------------------------------------
-
-if (debug) {
-	Xtrain_permutated <- Xtrain # not rearranging X makes debugging easier
-} else {
-	Xtrain_permutated <- sample(Xtrain)
-}
 
 # Defining user interface ====================================================
 
@@ -98,20 +90,37 @@ ui <- fluidPage(
 # Define server logic ========================================================
 
 server <- function(input, output, session) {
-	# Initializing reactive values
+	# Initializing reactive values -------------------------------------------
 	sim_result <- reactiveValues(series = NULL, latest = NULL)
 	decisions <- reactiveValues(series = NULL, latest = NULL)  # judgements (Y)
-	X <- reactiveValues(series = NULL, latest = NULL)  # theta
+	X <- reactiveValues(
+		permutated = NULL, series = NULL, latest = NULL, grid = NULL
+	) # theta
 	model <- reactiveValues(fit = NULL)
 	proxy <- reactiveValues(lik = 0, post = 0, pred_f = NULL)
 	i <- reactiveValues(i = 0, round1over = FALSE, round2over = FALSE)
 
+	# Starting Veri or Pari-PRECIOUS -----------------------------------------
+	observeEvent(input$start_veri, {
+		init_x_values <- init_X("veri")
+		Xtrain <- init_x_values[[1]]
+		X$grid  <- init_x_values[[2]]
+		if (i$i == 0) {
+			if (debug) {
+				# not rearranging X makes debugging easier
+				X$permutated <- Xtrain
+			} else {
+				X$permutated <- sample(Xtrain)
+			}
+			generate_X_ss()
+		}
+	})
 	# Creating function to fit model -----------------------------------------
 	fit_model <- reactive({
 		if (i$i > n_init) {
 			if (i$i == n_init + 1) {
 				model_fit(
-					as.matrix(Xtrain_permutated),
+					as.matrix(X$permutated),
 					as.matrix(decisions$series)
 				)
 			} else {
@@ -129,14 +138,15 @@ server <- function(input, output, session) {
 
 	get_X <- reactive({
 		# Function to retrieve the thetas (Xs) depending on which stage we are
+		# Results of this function are one number
 		if (i$i <= n_init) {
 			# First round
-			Xtrain_permutated[i$i]
+			X$permutated[i$i]
 		} else if (i$i <= n_tot) {
 			# Second round
 			model$fit <- fit_model()
 			if (debug) print(model$fit)
-			acquire_X(model$fit)
+			acquire_X(model$fit, X$grid)
 		}
 	})
 
@@ -194,9 +204,9 @@ server <- function(input, output, session) {
 	observe({
 		if (i$i > n_tot) {
 			# Calculating lik_proxy and post_proxy (after experiment is over)
-			proxy$lik <- calc_lik_proxy(model$fit)
+			proxy$lik <- calc_lik_proxy(model$fit, X$grid)
 			proxy$post <- calc_post_proxy(proxy$lik)
-			proxy$pred_f <- calc_pred_f(model$fit)
+			proxy$pred_f <- calc_pred_f(model$fit, X$grid)
 
 			# Final plot of post_proxy
 			output$post_proxy <- renderImage({
@@ -238,7 +248,7 @@ server <- function(input, output, session) {
 			# when the model updates are fixed
 			"theta_acquisitions" = isolate(X$series), # TODO: must match m.X
 			"label_acquisitions" = isolate(decisions$series), # TODO: must match m.Y
-			"theta_grid" = Xgrid,
+			"theta_grid" = isolate(X$grid),
 			"lik_proxy" = isolate(proxy$lik),
 			"post_proxy" = isolate(proxy$post),
 			"mean_pred_grid" = isolate(proxy$pred_f[[1]]),
