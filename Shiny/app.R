@@ -44,16 +44,31 @@ ui <- fluidPage(
 	sidebarLayout(
 		position = "left",
 		sidebarPanel(
-			"Decision", br(),
-			actionButton(
-				inputId = "realistic",
-				label = "Number is realistic",
-				style = "background-color:#00BB00"
+			conditionalPanel(
+				condition = "input.start_veri",
+				"Decision", br(),
+				actionButton(
+					inputId = "realistic",
+					label = "Number is realistic",
+					style = "background-color:#00BB00"
+				),
+				actionButton(
+					inputId = "unrealistic",
+					label = "Number is not realistic",
+					style = "background-color:#BB0000"
+				)
 			),
-			actionButton(
-				inputId = "unrealistic",
-				label = "Number is not realistic",
-				style = "background-color:#BB0000"
+			conditionalPanel(
+				condition = "input.start_pari",
+				"Decision", br(),
+				actionButton(
+					inputId = "choose_left",
+					label = "Left plot is more realistic"
+				),
+				actionButton(
+					inputId = "choose_right",
+					label = "Right plot is more realistic"
+				)
 			)
 		),
 		mainPanel(
