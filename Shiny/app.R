@@ -1,63 +1,102 @@
 library(reticulate)
 library(shiny)
 library(rdrop2)
-# ==============================================================================
-# Starting the virtual environment
-# ==============================================================================
+
+# Starting the virtual environment ===========================================
+
 virtualenv_create(
 	envname = "python_environment",
 	python  = "python3"
 )
+virtualenv_remove(envname = "python_environment", packages = "pip")
+virtualenv_install(envname = "python_environment", packages = "pip")
 virtualenv_install(
 	envname          = "python_environment",
-	packages         = c("numpy", "GPy", "matplotlib")
+	packages         = c(
+		"numpy", "GPy", "matplotlib", "IPython",
+		"scipy"
+	)
 )
 use_virtualenv("python_environment", required = TRUE)
-# ============== Initialize Python and R constants and functions ===============
+
+# Initializing Python and R constants and functions ==========================
+
 source_python("initialObjects.py")
-source_python("functions.py")
+source_python("functions-veri.py")
+source_python("functions-pari.py")
 
-# Manual debugging switch
-debug <- FALSE
+# Manual debugging switch ----------------------------------------------------
 
-# # Randomizing X
+debug <- TRUE
+
+# Randomizing X --------------------------------------------------------------
+
 if (debug) {
 	Xtrain_permutated <- Xtrain # not rearranging X makes debugging easier
 } else {
 	Xtrain_permutated <- sample(Xtrain)
 }
 
-# =========================== Define user interface ============================
+# Defining user interface ====================================================
+
 ui <- fluidPage(
 	titlePanel("Prior elicitation"),
 	sidebarLayout(
-		position = "right",
+		position = "left",
 		sidebarPanel(
-			"Decision",
-			br(),
-			actionButton(
-				inputId = "realistic",
-				label = "This is realistic",
-				style = "background-color:#00BB00"
+			conditionalPanel(
+				condition = "input.start_veri",
+				"Decision", br(),
+				actionButton(
+					inputId = "realistic",
+					label = "Number is realistic",
+					style = "background-color:#00BB00"
+				),
+				actionButton(
+					inputId = "unrealistic",
+					label = "Number is not realistic",
+					style = "background-color:#BB0000"
+				)
 			),
-			actionButton(
-				inputId = "unrealistic",
-				label = "This is not realistic",
-				style = "background-color:#BB0000"
+			conditionalPanel(
+				condition = "input.start_pari",
+				"Decision", br(),
+				actionButton(
+					inputId = "choose_left",
+					label = "Left plot is more realistic"
+				),
+				actionButton(
+					inputId = "choose_right",
+					label = "Right plot is more realistic"
+				)
 			)
 		),
 		mainPanel(
-			actionLink("start", "Click here to start"), br(),
-			"Peeking under the hood for development purposes...", br(),
-			"i: ", textOutput("i"),
-			"ss: ", textOutput("ss"),
-			"post_proxy: ", plotOutput("post_proxy"),
-			h2(uiOutput("final_link"))
+			tabsetPanel(type = "tabs",
+				tabPanel(
+					"Veri-PRECIOUS",
+					actionLink("start_veri", "Click here to start"), br(),
+					fluidRow(
+						column(3, h1("Number: ")),
+						column(2, h1(textOutput("ss")))
+					),
+					fluidRow(
+						column(2, h6("Round: ")),
+						column(3, h6(textOutput("i")))
+					),
+					h2(uiOutput("final_link"))
+				),
+				tabPanel(
+					"Pari-Precious",
+					actionLink("start_pari", "Click here to start"), br(),
+				)
+			)
 		)
 	)
 )
 
-# ============================ Define server logic =============================
+# Define server logic ========================================================
+
 server <- function(input, output, session) {
 	# Initializing reactive values
 	sim_result <- reactiveValues(series = NULL, latest = NULL)
@@ -67,7 +106,7 @@ server <- function(input, output, session) {
 	proxy <- reactiveValues(lik = 0, post = 0, pred_f = NULL)
 	i <- reactiveValues(i = 0, round1over = FALSE, round2over = FALSE)
 
-	# Creating function to fit model
+	# Creating function to fit model -----------------------------------------
 	fit_model <- reactive({
 		if (i$i > n_init) {
 			if (i$i == n_init + 1) {
@@ -86,7 +125,8 @@ server <- function(input, output, session) {
 		}
 	})
 
-	# Creating function to retrieve theta (X)
+	# Creating function to retrieve theta (X) --------------------------------
+
 	get_X <- reactive({
 		# Function to retrieve the thetas (Xs) depending on which stage we are
 		if (i$i <= n_init) {
@@ -100,8 +140,8 @@ server <- function(input, output, session) {
 		}
 	})
 
+	# generating X, simulating value, updating model -------------------------
 
-	# generating X, simulating value, updating model
 	generate_X_ss <- reactive({
 		i$i <- i$i + 1
 		if (i$i <= n_tot) {
@@ -113,9 +153,11 @@ server <- function(input, output, session) {
 		}
 	})
 
-	# Basic reactions to buttons (i.e., starting, recording judgements)
-	observeEvent(input$start, {
+	# Basic reactions to buttons (i.e., starting, recording judgements) ------
+	observeEvent(input$start_veri, {
 		if (i$i == 0) generate_X_ss()
+		Xtrain <- init_X("veri")[1]
+		Xgrid <- init_X("veri")[2]
 	})
 	observeEvent(input$realistic, {
 		if (i$i <= n_tot) {
@@ -134,7 +176,8 @@ server <- function(input, output, session) {
 		}
 	})
 
-	# Final calculations
+	# Final calculations -----------------------------------------------------
+
 	observe({
 		if (i$i > n_tot) {
 			# Calculating lik_proxy and post_proxy (after experiment is over)
@@ -168,11 +211,13 @@ server <- function(input, output, session) {
 		}
 	})
 
-	# Controls for development
+	# Controls for development -----------------------------------------------
+
 	output$i <- renderText(i$i)
 	output$ss <- renderText(sim_result$latest)
 
-	# Saving output
+	# Saving output ----------------------------------------------------------
+
 	session$onSessionEnded(function() {
 		saved_objects <- list(
 			"gpy_params" = isolate(model$fit$param_array),
@@ -191,7 +236,7 @@ server <- function(input, output, session) {
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
 		file_name <- paste("Results", date_time, machine_name, sep="_")
 		if (debug) {
-			cat("Exported list structure:\n")
+			message("Exported list structure:")
 			print(str(saved_objects))
 			lapply(saved_objects, summary)
 			print(cbind(
@@ -206,5 +251,6 @@ server <- function(input, output, session) {
 	})
 }
 
-# ================================ Run the app =================================
+# Run the app ================================================================
+
 shinyApp(ui, server)
