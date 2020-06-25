@@ -156,6 +156,8 @@ server <- function(input, output, session) {
 	# Basic reactions to buttons (i.e., starting, recording judgements) ------
 	observeEvent(input$start_veri, {
 		if (i$i == 0) generate_X_ss()
+		Xtrain <- init_X("veri")[1]
+		Xgrid <- init_X("veri")[2]
 	})
 	observeEvent(input$realistic, {
 		if (i$i <= n_tot) {
