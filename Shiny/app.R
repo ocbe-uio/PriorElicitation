@@ -81,6 +81,8 @@ ui <- fluidPage(
 				tabPanel(
 					"Pari-Precious",
 					actionLink("start_pari", "Click here to start"), br(),
+					plotOutput("barplot_left"),
+					plotOutput("barplot_right")
 				)
 			)
 		)
@@ -94,7 +96,8 @@ server <- function(input, output, session) {
 	sim_result <- reactiveValues(series = NULL, latest = NULL)
 	decisions <- reactiveValues(series = NULL, latest = NULL)  # judgements (Y)
 	X <- reactiveValues(
-		permutated = NULL, series = NULL, latest = NULL, grid = NULL
+		permutated = NULL, series = NULL, latest = NULL, grid = NULL,
+		plots_heights = list(0, 0)
 	) # theta
 	model <- reactiveValues(fit = NULL)
 	proxy <- reactiveValues(lik = 0, post = 0, pred_f = NULL)
@@ -115,6 +118,27 @@ server <- function(input, output, session) {
 			generate_X_ss()
 		}
 	})
+	observeEvent(input$start_pari, {
+		init_x_values <- init_X("pari")
+		init_grid_indices      <- init_x_values[[1]]
+		anti_init_grid_indices <- init_x_values[[2]]
+		Xtrain                 <- init_x_values[[3]]
+		X1train                <- init_x_values[[4]]
+		X2train                <- init_x_values[[5]]
+		X1traingrid            <- init_x_values[[6]]
+		X2traingrid            <- init_x_values[[7]]
+		Xtrain                 <- init_x_values[[8]]
+		if (i$i == 0) {
+			if (debug) {
+				# not rearranging X makes debugging easier
+				X$permutated <- Xtrain
+			} else {
+				X$permutated <- sample(Xtrain)
+			}
+			X$plots_heights <- generate_X_plots_heights()
+		}
+	})
+
 	# Creating function to fit model -----------------------------------------
 	fit_model <- reactive({
 		if (i$i > n_init) {
@@ -150,6 +174,17 @@ server <- function(input, output, session) {
 		}
 	})
 
+	get_X_pairs <- reactive(({
+		# Results of this function are pairs of numbers
+		if (i$i <= n_init) {
+			# First round
+			X$permutated[i$i, ]
+		} else if (i$i <= n_tot) {
+			# Second round
+			stop("Under construction")
+		}
+	}))
+
 	# generating X, simulating value, updating model -------------------------
 
 	generate_X_ss <- reactive({
@@ -163,24 +198,15 @@ server <- function(input, output, session) {
 		}
 	})
 
-	# Basic reactions to buttons (i.e., starting, recording judgements) ------
-	observeEvent(input$start_veri, {
-		if (i$i == 0) generate_X_ss()
-		init_x_values <- init_X("veri")
-		Xtrain <- init_x_values[1]
-		Xgrid  <- init_x_values[2]
+	generate_X_plots_heights <- reactive({
+		i$i <- i$i + 1
+		if (i$i <= n_tot) {
+			X$latest <- get_X_pairs()
+			gen_X_plots_values(X$latest)
+		}
 	})
-	observeEvent(input$start_pari, {
-		init_x_values <- init_X("pari")
-		init_grid_indices      <- init_x_values[1]
-		anti_init_grid_indices <- init_x_values[2]
-		Xtrain                 <- init_x_values[3]
-		X1train                <- init_x_values[4]
-		X2train                <- init_x_values[5]
-		X1traingrid            <- init_x_values[6]
-		X2traingrid            <- init_x_values[7]
-		Xtrain                 <- init_x_values[8]
-	})
+
+	# Recording judgements ---------------------------------------------------
 	observeEvent(input$realistic, {
 		if (i$i <= n_tot) {
 			# Record latest decision
@@ -238,6 +264,19 @@ server <- function(input, output, session) {
 
 	output$i <- renderText(i$i)
 	output$ss <- renderText(sim_result$latest)
+	# TODO: randomize order of 1 and 2 below
+	output$barplot_left <- renderPlot({
+		barplot(
+			height = X$plots_heights[[1]],
+			names.arg = seq_along(X$plots_heights[[1]])
+		)
+	})
+	output$barplot_right <- renderPlot({
+		barplot(
+			height = X$plots_heights[[2]],
+			names.arg = seq_along(X$plots_heights[[2]])
+		)
+	})
 
 	# Saving output ----------------------------------------------------------
 
