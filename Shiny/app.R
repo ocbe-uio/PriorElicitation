@@ -258,16 +258,6 @@ server <- function(input, output, session) {
 			proxy$post <- calc_post_proxy(proxy$lik)
 			proxy$pred_f <- calc_pred_f(model$fit, X$grid)
 
-			# Final plot of post_proxy
-			output$post_proxy <- renderImage({
-				outfile <- tempfile(fileext = '.png')
-				png(outfile, width=400, height=400)
-				plot(proxy$post)
-				dev.off()
-
-				list(src = outfile, alt = "There should be a plot here")
-			}, deleteFile = TRUE)
-
 			# Final link
 			url <- a("CLICK HERE", href="http://www.uio.no")
 			output$final_link <- renderUI({
