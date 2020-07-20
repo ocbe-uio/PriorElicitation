@@ -2,6 +2,11 @@
 # all constants used in the backend calculations.
 import numpy as np
 
+# ==============================================================================
+# Manual debugging switch
+# ==============================================================================
+debug = False
+
 n_init = 10  # TODO: change back to default (21) after testing
 n_update = 20  # TODO: change back to default (79) after testing
 n_tot = n_init + n_update

@@ -2,10 +2,6 @@ library(reticulate)
 library(shiny)
 library(rdrop2)
 
-# Manual debugging switch ====================================================
-
-debug <- TRUE
-
 # Starting the virtual environment ===========================================
 
 virtualenv_create(
