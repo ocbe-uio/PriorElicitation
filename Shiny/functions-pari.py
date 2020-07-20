@@ -1,14 +1,4 @@
-from matplotlib import pyplot as plt
-# get_ipython().run_line_magic('matplotlib', 'inline') # TODO: part of plotting. Remove?
-import sys
-import csv
 import numpy as np
-import GPy
-from IPython.display import clear_output
-from scipy.stats import norm
-# from GPy_logit_link import Logit, g_log
-
-
 # In[38]:
 
 
