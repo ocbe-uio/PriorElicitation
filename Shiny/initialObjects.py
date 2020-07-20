@@ -7,8 +7,18 @@ import numpy as np
 # ==============================================================================
 debug = False
 
-n_init = 10  # TODO: change back to default (21) after testing
-n_update = 20  # TODO: change back to default (79) after testing
+
+def set_n(debug):
+    if debug:
+        n_init = 10
+        n_update = 20
+    else:
+        n_init = 21
+        n_update = 79
+    return(n_init, n_update)
+
+
+n_init, n_update = set_n(debug)
 n_tot = n_init + n_update
 n_opt = 5
 plotting = False
