@@ -202,7 +202,14 @@ server <- function(input, output, session) {
 		i$i <- i$i + 1
 		if (i$i <= n_tot) {
 			X$latest <- get_X_pairs()
-			gen_X_plots_values(X$latest)
+			gen_X_plots_values(X$latest)  # TODO: Useless Python function? DEL?
+			X$plots_heights <- gen_X_plots_values(X$latest)
+			if (debug) {
+				print(X$latest)
+				print(X$plots_heights)
+			}
+			# browser()#TEMP
+			X$series <- append(X$series, X$latest)
 		}
 	})
 
