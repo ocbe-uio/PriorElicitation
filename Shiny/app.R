@@ -231,6 +231,20 @@ server <- function(input, output, session) {
 		}
 	})
 	# TODO: add input$choose_left and input$choose_right
+	observeEvent(input$choose_left, {
+			if (i$i <= n_tot) {
+			decisions$latest <- "left"
+			decisions$series <- append(decisions$series, "left")
+			generate_X_plots_heights()
+		}
+	})
+	observeEvent(input$choose_right, {
+			if (i$i <= n_tot) {
+			decisions$latest <- "right"
+			decisions$series <- append(decisions$series, "right")
+			generate_X_plots_heights()
+		}
+	})
 
 	# Final calculations -----------------------------------------------------
 
