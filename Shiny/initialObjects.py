@@ -24,8 +24,10 @@ def init_X(precious_type):
         X2train = np.linspace(0, 1, n_init)
         X1traingrid, X2traingrid = np.meshgrid(X1train, X2train)
         Xtrain = np.concatenate(
-            np.reshape(X1traingrid[init_grid_indices], (-1, 1)),
-            np.reshape(X2traingrid[init_grid_indices], (-1, 1)),
+            (
+                np.reshape(X1traingrid[init_grid_indices], (-1, 1)),
+                np.reshape(X2traingrid[init_grid_indices], (-1, 1))
+            ),
             axis=1
         )
         return(
