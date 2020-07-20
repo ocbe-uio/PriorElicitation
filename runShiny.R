@@ -1,2 +1,2 @@
 library(shiny)
-runApp("Shiny")
+runApp("Shiny", launch.browser=FALSE)
