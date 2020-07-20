@@ -191,10 +191,13 @@ server <- function(input, output, session) {
 		i$i <- i$i + 1
 		if (i$i <= n_tot) {
 			X$latest <- get_X()
-			if (debug) print(X$latest)
 			X$series <- append(X$series, X$latest)
 			sim_result$latest <- gen_sim(X$latest)
 			sim_result$series <- append(sim_result$series, sim_result$latest)
+			if (debug) {
+				print(X$latest)
+				print(sim_result$latest)
+			}
 		}
 	})
 
