@@ -131,7 +131,11 @@ server <- function(input, output, session) {
 				# not rearranging X makes debugging easier
 				X$permutated <- Xtrain
 			} else {
-				X$permutated <- sample(Xtrain)
+				if (length(dim(Xtrain)) == 1) {
+					X$permutated <- sample(Xtrain)
+				} else {
+					X$permutated <- Xtrain[sample(seq_len(nrow(Xtrain))), ]
+				}
 			}
 			X$plots_heights <- generate_X_plots_heights()
 		}
