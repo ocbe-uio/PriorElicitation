@@ -97,7 +97,7 @@ def plotting(Xtrain, ytrain, pred_f, Xgrid, lik_proxy, post_proxy, m, stage=1):
         plt.scatter(m.X, m.Y)
         plt.show()
 
-def model_fit(Xtrain, ytrain):
+def model_fit_veri(Xtrain, ytrain):
     # Kernel
     kern = GPy.kern.Matern32(input_dim=1) \
         + GPy.kern.White(input_dim=1) \
@@ -119,7 +119,7 @@ def model_fit(Xtrain, ytrain):
     return(m)
 
 
-def model_update(m, X_acq, y_acq, i, n_opt):
+def model_update_veri(m, X_acq, y_acq, i, n_opt):
     # import pdb; pdb.set_trace() # debugging breakpoint
     # Kernel
     thiskern = m.kern.copy()
@@ -144,7 +144,7 @@ def model_update(m, X_acq, y_acq, i, n_opt):
 
     return(m)
 
-def acquire_X(m, Xgrid, acq_noise=0.1):
+def acquire_X_veri(m, Xgrid, acq_noise=0.1):
 
     # for i in range(n_update):
     thisXgrid = Xgrid.copy()
@@ -155,7 +155,7 @@ def acquire_X(m, Xgrid, acq_noise=0.1):
     X_acq = min(max(X_acq, 0 * X_acq), X_acq / X_acq)
     return(X_acq)
 
-def calc_lik_proxy(m, Xgrid):
+def calc_lik_proxy_veri(m, Xgrid):
     lik_proxy = np.exp(m.predict_noiseless(Xgrid)[0])
     return(lik_proxy)
 

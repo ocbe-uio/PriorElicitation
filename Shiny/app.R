@@ -143,15 +143,15 @@ server <- function(input, output, session) {
 	})
 
 	# Creating function to fit model -----------------------------------------
-	fit_model <- reactive({
+	fit_model_veri <- reactive({
 		if (i$i > n_init) {
 			if (i$i == n_init + 1) {
-				model_fit(
+				model_fit_veri(
 					as.matrix(X$permutated),
 					as.matrix(decisions$series)
 				)
 			} else {
-				model_update(
+				model_update_veri(
 					model$fit,
 					as.matrix(X$latest),
 					as.matrix(decisions$latest),
@@ -171,9 +171,9 @@ server <- function(input, output, session) {
 			X$permutated[i$i]
 		} else if (i$i <= n_tot) {
 			# Second round: gather values from model
-			model$fit <- fit_model()
+			model$fit <- fit_model_veri()
 			if (debug) print(model$fit)
-			acquire_X(model$fit, X$grid)
+			acquire_X_veri(model$fit, X$grid)
 		}
 	})
 
@@ -254,7 +254,7 @@ server <- function(input, output, session) {
 	observe({
 		if (i$i > n_tot) {
 			# Calculating lik_proxy and post_proxy (after experiment is over)
-			proxy$lik <- calc_lik_proxy(model$fit, X$grid)
+			proxy$lik <- calc_lik_proxy_veri(model$fit, X$grid)
 			proxy$post <- calc_post_proxy(proxy$lik)
 			proxy$pred_f <- calc_pred_f(model$fit, X$grid)
 
