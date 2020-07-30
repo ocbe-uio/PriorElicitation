@@ -91,11 +91,6 @@ def dts_acquisition_X(m, X):
 
 # TODO: No more functions. The rest is the script to be ported to R
 
-# # In[50]:
-
-# ytrain = y_input(Xtrain)
-
-
 # In[51]:
 
 

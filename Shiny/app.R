@@ -277,7 +277,6 @@ server <- function(input, output, session) {
 
 	output$i <- renderText(i$i)
 	output$ss <- renderText(sim_result$latest)
-	# TODO: randomize order of 1 and 2 below
 	output$barplot_left <- renderPlot({
 		barplot(
 			height = X$plots_heights[[1]],
@@ -298,14 +297,14 @@ server <- function(input, output, session) {
 			"gpy_params" = isolate(model$fit$param_array),
 			# FIXME: theta_acq and label_acq should match their models counterparts
 			# when the model updates are fixed
-			"theta_acquisitions" = isolate(X$series), # TODO: must match m.X
-			"label_acquisitions" = isolate(decisions$series), # TODO: must match m.Y
-			"theta_grid" = isolate(X$grid),
-			"lik_proxy" = isolate(proxy$lik),
-			"post_proxy" = isolate(proxy$post),
-			"mean_pred_grid" = isolate(proxy$pred_f[[1]]),
-			"var_pred_grid" = isolate(proxy$pred_f[[2]]),
-			"simulations" = isolate(sim_result$series)
+			"theta_acquisitions" = isolate(X$series), # TODO must match m.X
+			"label_acquisitions" = isolate(decisions$series), # TODO: match m.Y
+			"theta_grid"         = isolate(X$grid),
+			"lik_proxy"          = isolate(proxy$lik),
+			"post_proxy"         = isolate(proxy$post),
+			"mean_pred_grid"     = isolate(proxy$pred_f[[1]]),
+			"var_pred_grid"      = isolate(proxy$pred_f[[2]]),
+			"simulations"        = isolate(sim_result$series)
 		)
 		machine_name <- system("uname -n", intern=TRUE)
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
