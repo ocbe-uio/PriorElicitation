@@ -137,7 +137,7 @@ server <- function(input, output, session) {
 					X$permutated <- Xtrain[sample(seq_len(nrow(Xtrain))), ]
 				}
 			}
-			X$plots_heights <- generate_X_plots_heights()
+			generate_X_plots_heights()
 		}
 	})
 
