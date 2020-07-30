@@ -161,6 +161,26 @@ server <- function(input, output, session) {
 		}
 	})
 
+	fit_model_pari <- reactive({
+		if (i$i > n_init) {
+			if (i$i == n_init + 1) {
+				# TODO: develop Python part and adapt
+				# model_fit_pari(
+				# 	as.matrix(X$permutated),
+				# 	as.matrix(decisions$series)
+				# )
+			} else {
+				# TODO: develop Python part and adapt
+				# model_update_veri(
+				# 	model$fit,
+				# 	as.matrix(X$latest),
+				# 	as.matrix(decisions$latest),
+				# 	i$i, n_opt
+				# )
+			}
+		}
+	})
+
 	# Creating function to retrieve theta (X) --------------------------------
 
 	get_X <- reactive({ # Used by Veri
@@ -184,7 +204,9 @@ server <- function(input, output, session) {
 			X$permutated[i$i, ]
 		} else if (i$i <= n_tot) {
 			# Second round: gather values from model
-			stop("Under construction") # TODO: implement In >= [51]
+			model$fit <- fir_model_pari()
+			if (debug) print(model$fit)
+
 		}
 	})
 
