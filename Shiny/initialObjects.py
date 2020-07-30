@@ -5,13 +5,13 @@ import numpy as np
 # ==============================================================================
 # Manual debugging switch
 # ==============================================================================
-debug = False
+debug = True
 
 
 def set_n(debug):
     if debug:
         n_init = 10
-        n_update = 20
+        n_update = 10
     else:
         n_init = 21
         n_update = 79
