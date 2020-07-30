@@ -24,6 +24,7 @@ use_virtualenv("python_environment", required = TRUE)
 source_python("initialObjects.py")
 source_python("functions-veri.py")
 source_python("functions-pari.py")
+if (debug) message("##### Running in debug mode #####")
 
 # Defining user interface ====================================================
 
@@ -166,10 +167,10 @@ server <- function(input, output, session) {
 		# Function to retrieve the thetas (Xs) depending on which stage we are
 		# Results of this function are one number
 		if (i$i <= n_init) {
-			# First round
+			# First round: gather values from pre-generated probability grid
 			X$permutated[i$i]
 		} else if (i$i <= n_tot) {
-			# Second round
+			# Second round: gather values from model
 			model$fit <- fit_model()
 			if (debug) print(model$fit)
 			acquire_X(model$fit, X$grid)
@@ -179,11 +180,11 @@ server <- function(input, output, session) {
 	get_X_pairs <- reactive({ # Used by Pari
 		# Results of this function are pairs of numbers
 		if (i$i <= n_init) {
-			# First round
+			# First round: gather values from pre-generated probability grid
 			X$permutated[i$i, ]
 		} else if (i$i <= n_tot) {
-			# Second round
-			stop("Under construction") # TODO: implement
+			# Second round: gather values from model
+			stop("Under construction") # TODO: implement In >= [51]
 		}
 	})
 
