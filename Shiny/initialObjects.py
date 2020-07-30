@@ -2,8 +2,23 @@
 # all constants used in the backend calculations.
 import numpy as np
 
-n_init = 10  # TODO: change back to default (21) after testing
-n_update = 20  # TODO: change back to default (79) after testing
+# ==============================================================================
+# Manual debugging switch
+# ==============================================================================
+debug = True
+
+
+def set_n(debug):
+    if debug:
+        n_init = 10
+        n_update = 10
+    else:
+        n_init = 21
+        n_update = 79
+    return(n_init, n_update)
+
+
+n_init, n_update = set_n(debug)
 n_tot = n_init + n_update
 n_opt = 5
 plotting = False
@@ -24,8 +39,10 @@ def init_X(precious_type):
         X2train = np.linspace(0, 1, n_init)
         X1traingrid, X2traingrid = np.meshgrid(X1train, X2train)
         Xtrain = np.concatenate(
-            np.reshape(X1traingrid[init_grid_indices], (-1, 1)),
-            np.reshape(X2traingrid[init_grid_indices], (-1, 1)),
+            (
+                np.reshape(X1traingrid[init_grid_indices], (-1, 1)),
+                np.reshape(X2traingrid[init_grid_indices], (-1, 1))
+            ),
             axis=1
         )
         return(

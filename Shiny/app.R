@@ -2,10 +2,6 @@ library(reticulate)
 library(shiny)
 library(rdrop2)
 
-# Manual debugging switch ====================================================
-
-debug <- TRUE
-
 # Starting the virtual environment ===========================================
 
 virtualenv_create(
@@ -64,7 +60,9 @@ ui <- fluidPage(
 			)
 		),
 		mainPanel(
-			tabsetPanel(type = "tabs",
+			tabsetPanel(
+				type = "tabs",
+				selected = "Pari-PRECIOUS",
 				tabPanel(
 					"Veri-PRECIOUS",
 					actionLink("start_veri", "Click here to start"), br(),
@@ -79,7 +77,7 @@ ui <- fluidPage(
 					h2(uiOutput("final_link"))
 				),
 				tabPanel(
-					"Pari-Precious",
+					"Pari-PRECIOUS",
 					actionLink("start_pari", "Click here to start"), br(),
 					plotOutput("barplot_left"),
 					plotOutput("barplot_right")
@@ -133,7 +131,11 @@ server <- function(input, output, session) {
 				# not rearranging X makes debugging easier
 				X$permutated <- Xtrain
 			} else {
-				X$permutated <- sample(Xtrain)
+				if (length(dim(Xtrain)) == 1) {
+					X$permutated <- sample(Xtrain)
+				} else {
+					X$permutated <- Xtrain[sample(seq_len(nrow(Xtrain))), ]
+				}
 			}
 			X$plots_heights <- generate_X_plots_heights()
 		}
@@ -160,7 +162,7 @@ server <- function(input, output, session) {
 
 	# Creating function to retrieve theta (X) --------------------------------
 
-	get_X <- reactive({
+	get_X <- reactive({ # Used by Veri
 		# Function to retrieve the thetas (Xs) depending on which stage we are
 		# Results of this function are one number
 		if (i$i <= n_init) {
@@ -174,35 +176,43 @@ server <- function(input, output, session) {
 		}
 	})
 
-	get_X_pairs <- reactive(({
+	get_X_pairs <- reactive({ # Used by Pari
 		# Results of this function are pairs of numbers
 		if (i$i <= n_init) {
 			# First round
 			X$permutated[i$i, ]
 		} else if (i$i <= n_tot) {
 			# Second round
-			stop("Under construction")
-		}
-	}))
-
-	# generating X, simulating value, updating model -------------------------
-
-	generate_X_ss <- reactive({
-		i$i <- i$i + 1
-		if (i$i <= n_tot) {
-			X$latest <- get_X()
-			if (debug) print(X$latest)
-			X$series <- append(X$series, X$latest)
-			sim_result$latest <- gen_sim(X$latest)
-			sim_result$series <- append(sim_result$series, sim_result$latest)
+			stop("Under construction") # TODO: implement
 		}
 	})
 
-	generate_X_plots_heights <- reactive({
+	# generating X, simulating value, updating model -------------------------
+
+	generate_X_ss <- reactive({ # Used by Veri
+		i$i <- i$i + 1
+		if (i$i <= n_tot) {
+			X$latest <- get_X()
+			X$series <- append(X$series, X$latest)
+			sim_result$latest <- gen_sim(X$latest)
+			sim_result$series <- append(sim_result$series, sim_result$latest)
+			if (debug) {
+				print(X$latest)
+				print(sim_result$latest)
+			}
+		}
+	})
+
+	generate_X_plots_heights <- reactive({ # Used by Pari
 		i$i <- i$i + 1
 		if (i$i <= n_tot) {
 			X$latest <- get_X_pairs()
-			gen_X_plots_values(X$latest)
+			X$plots_heights <- gen_X_plots_values(X$latest)
+			if (debug) {
+				print(X$latest)
+				print(X$plots_heights)
+			}
+			X$series <- append(X$series, X$latest)
 		}
 	})
 
@@ -223,7 +233,20 @@ server <- function(input, output, session) {
 			generate_X_ss()
 		}
 	})
-	# TODO: add input$choose_left and input$choose_right
+	observeEvent(input$choose_left, {
+			if (i$i <= n_tot) {
+			decisions$latest <- "left"
+			decisions$series <- append(decisions$series, "left")
+			generate_X_plots_heights()
+		}
+	})
+	observeEvent(input$choose_right, {
+			if (i$i <= n_tot) {
+			decisions$latest <- "right"
+			decisions$series <- append(decisions$series, "right")
+			generate_X_plots_heights()
+		}
+	})
 
 	# Final calculations -----------------------------------------------------
 
@@ -233,16 +256,6 @@ server <- function(input, output, session) {
 			proxy$lik <- calc_lik_proxy(model$fit, X$grid)
 			proxy$post <- calc_post_proxy(proxy$lik)
 			proxy$pred_f <- calc_pred_f(model$fit, X$grid)
-
-			# Final plot of post_proxy
-			output$post_proxy <- renderImage({
-				outfile <- tempfile(fileext = '.png')
-				png(outfile, width=400, height=400)
-				plot(proxy$post)
-				dev.off()
-
-				list(src = outfile, alt = "There should be a plot here")
-			}, deleteFile = TRUE)
 
 			# Final link
 			url <- a("CLICK HERE", href="http://www.uio.no")
@@ -308,6 +321,7 @@ server <- function(input, output, session) {
 		} else {
 			saveRDS(saved_objects, file = paste0(file_name, ".rds"))
 			drop_upload(paste0(file_name, ".rds"))
+			message("Results were exported to the configured Dropbox account")
 		}
 		stopApp()
 	})

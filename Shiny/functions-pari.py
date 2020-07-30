@@ -1,16 +1,4 @@
-from matplotlib import pyplot as plt
-# get_ipython().run_line_magic('matplotlib', 'inline') # TODO: part of plotting. Remove?
-import sys
-import csv
 import numpy as np
-import GPy
-from IPython.display import clear_output
-from scipy.stats import norm
-# from GPy_logit_link import Logit, g_log
-
-
-# In[38]:
-
 
 def sample_crp(alpha, theta, n):
     membership = [1]
@@ -24,38 +12,15 @@ def sample_crp(alpha, theta, n):
     membership.sort(reverse=True)
     return(membership)
 
-# In[41]:
-
-
-def y_input(X):
-    # judgement = np.zeros((np.shape(X)[0], 1))
-    for i in range(np.shape(X)[0]):  # i goes from 0 to nrow(X)
-        members_0 = sample_crp(X[i, 0], 0., 100)
-        members_1 = sample_crp(X[i, 1], 0., 100)
-        # Random procedure below rendomizes order of plots
-        # bin_rand = np.random.binomial(n = 1, p = .5)
-        # if bin_rand: # == 1
-        #     # TODO: move plotting to R
-        #     plt.subplot(1, 2, 1)
-        #     plt.bar(height = members_1, x = range(len(members_1)))
-        #     plt.subplot(1, 2, 2)
-        #     plt.bar(height = members_0, x = range(len(members_0)))
-        #     plt.show()
-        # else: # == 0
-        #     # TODO: move plotting to R
-        #     plt.subplot(1, 2, 1)
-        #     plt.bar(height = members_0, x = range(len(members_0)))
-        #     plt.subplot(1, 2, 2)
-        #     plt.bar(height = members_1, x = range(len(members_1)))
-        #     plt.show()
-        # judgement[i] = float(float(input()) = =bin_rand) # FIXME: input() should ask for text input
-        # # TODO: input() should come from Shiny
-    # return(judgement)
-
 def gen_X_plots_values(X):
     members_0 = sample_crp(X[0], 0., 100)
     members_1 = sample_crp(X[1], 0., 100)
-    return(members_0, members_1)
+    # Random procedure below rendomizes order of plots
+    bin_rand = np.random.binomial(n = 1, p = .5)
+    if bin_rand: # == 1
+        return(members_1, members_0)
+    else: # == 0
+        return(members_0, members_1)
 
 # In[43]:
 
