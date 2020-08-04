@@ -6,18 +6,11 @@ library(rdrop2)
 
 virtualenv_create(
 	envname = "python_environment",
-	python  = "python3"
+	python  = NULL #"python3"
 )
-virtualenv_remove(envname = "python_environment", packages = "pip")
-virtualenv_install(envname = "python_environment", packages = "pip")
-virtualenv_install(
-	envname          = "python_environment",
-	packages         = c(
-		"numpy", "GPy", "matplotlib", "IPython",
-		"scipy"
-	)
-)
-use_virtualenv("python_environment", required = TRUE)
+# virtualenv_install(envname = "python_environment", packages = "pip")
+# virtualenv_install(envname = "python_environment", packages = c("numpy", "GPy"))
+use_virtualenv("python_environment", required = FALSE)
 
 # Initializing Python and R constants and functions ==========================
 

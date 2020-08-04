@@ -1,4 +1,3 @@
-from matplotlib import pyplot as plt
 import numpy as np
 import GPy
 from GPy.likelihoods.link_functions import GPTransformation
