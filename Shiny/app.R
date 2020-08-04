@@ -8,8 +8,10 @@ virtualenv_create(
 	envname = "python_environment",
 	python  = NULL #"python3"
 )
-# virtualenv_install(envname = "python_environment", packages = "pip")
-# virtualenv_install(envname = "python_environment", packages = c("numpy", "GPy"))
+virtualenv_install(
+	envname = "python_environment",
+	packages = c("numpy", "GPy", "matplotlib")
+)
 use_virtualenv("python_environment", required = FALSE)
 
 # Initializing Python and R constants and functions ==========================
