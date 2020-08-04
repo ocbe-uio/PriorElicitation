@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def sample_crp(alpha, theta, n):
     membership = [1]
     for i in range(1, n):
@@ -11,6 +12,7 @@ def sample_crp(alpha, theta, n):
             membership = [membership[m]+newmember[m] for m in range(len(membership))]
     membership.sort(reverse=True)
     return(membership)
+
 
 def gen_X_plots_values(X):
     members_0 = sample_crp(X[0], 0., 100)
@@ -44,8 +46,6 @@ def var_acquisition(m, X):
 
 def hPHI(x):
     return (-norm.cdf(x)*norm.logcdf(x)-(1-norm.cdf(x))*norm.logcdf(-x))
-
-
 
 # In[46]:
 
@@ -84,14 +84,15 @@ def dts_acquisition_X(m, X):
 
 # In[51]:
 
+
 def reshapeXY(X1traingrid, X2traingrid, ytrain, Xtrain):
     X2grid_reshaped = np.reshape(X2traingrid[init_grid_indices], (-1, 1))
     X1grid_reshaped = np.reshape(X1traingrid[init_grid_indices], (-1, 1))
-    Xtrainmirror = np.concatenate((X2grid_reshaped, X1grid_reshaped),axis = 1)
+    Xtrainmirror = np.concatenate((X2grid_reshaped, X1grid_reshaped), axis=1)
     ytrainmirror = 1 - ytrain
     # Output
-    Xtrainfull = np.concatenate((Xtrain, Xtrainmirror), axis = 0)
-    ytrainfull = np.concatenate((ytrain, ytrainmirror), axis = 0)
+    Xtrainfull = np.concatenate((Xtrain, Xtrainmirror), axis=0)
+    ytrainfull = np.concatenate((ytrain, ytrainmirror), axis=0)
     return(Xtrainfull, ytrainfull)
 
 
@@ -99,20 +100,20 @@ def reshapeXY(X1traingrid, X2traingrid, ytrain, Xtrain):
 
 def model_fit_pari():
     # Kernel
-    kern = GPy.kern.Matern32(input_dim = 1, active_dims = 0) \
-        + GPy.kern.Matern32(input_dim = 1, active_dims = 1)
+    kern = GPy.kern.Matern32(input_dim=1, active_dims=0) \
+        + GPy.kern.Matern32(input_dim=1, active_dims=1)
     kern.Mat32.variance.set_prior(GPy.priors.Gamma.from_EV(1., 1.))
     kern.Mat32_1.variance.set_prior(GPy.priors.Gamma.from_EV(1., 1.))
     # Likelihood
     logit_link = Logit()
-    lik_link = GPy.likelihoods.Bernoulli(gp_link = logit_link)
+    lik_link = GPy.likelihoods.Bernoulli(gp_link=logit_link)
     laplace_inf = GPy.inference.latent_function_inference.Laplace()
     # Model fit
     m = GPy.models.GPClassification(
         Xtrainfull, ytrainfull, kernel=kern, likelihood=lik_link,
         inference_method=laplace_inf
     )
-    m.optimize() #first runs EP and then optimizes the kernel parameters
+    m.optimize()  # first runs EP and then optimizes the kernel parameters
     return(m)
 
 
@@ -128,7 +129,7 @@ def acquire_X_pari(n_test=51):
 
     Xtest = np.concatenate(
         (np.reshape(X1testgrid, (-1, 1)), np.reshape(X2testgrid, (-1, 1))),
-        axis = 1
+        axis=1
     )
 
     Xacq = np.concatenate(
@@ -136,7 +137,7 @@ def acquire_X_pari(n_test=51):
             np.reshape(X1testgrid[test_grid_indices], (-1, 1)),
             np.reshape(X2testgrid[test_grid_indices], (-1, 1))
         ),
-        axis = 1
+        axis=1
     )
     return(X_acq)
 
@@ -144,37 +145,37 @@ def acquire_X_pari(n_test=51):
 # # In[54]:
 
 def calc_lik_proxy_pari(m, Xtest, n_test=51):
-    lik_proxy    = np.exp(m.predict_noiseless(Xtest)[0])
+    lik_proxy = np.exp(m.predict_noiseless(Xtest)[0])
     loglik_proxy = m.predict_noiseless(Xtest)[0]
     loglik_proxy = np.reshape(loglik_proxy, (n_test, n_test))
-    lik_proxy    = np.reshape(lik_proxy, (n_test, n_test))
+    lik_proxy = np.reshape(lik_proxy, (n_test, n_test))
     return(lik_proxy)
 
 # In[62]:
 
-def model_update_pari(m, Xtest, n_init, acq_noise=0.1):
-    n_update = 50 - int(.5 * n_init ** 2) - 3
-    for i in range(n_update):
-        # TODO: mode loop out of function (requires user intervention)
-        thisXacq = Xtest.copy()
-        X_acq_opt = dts_acquisition_X(m, thisXacq)
-        X_acq_opt+ = np.random.normal(0, acq_noise, np.shape(X_acq_opt))
-        X_acq_opt[:, 0] = np.clip(X_acq_opt[:, 0], 0,1)
-        X_acq_opt[:, 1] = np.clip(X_acq_opt[:, 1], 0,1)
+# def model_update_pari(m, Xtest, n_init, acq_noise=0.1):
+#     n_update = 50 - int(.5 * n_init ** 2) - 3
+#     for i in range(n_update):
+#         # TODO: mode loop out of function (requires user intervention)
+#         thisXacq = Xtest.copy()
+#         X_acq_opt = dts_acquisition_X(m, thisXacq)
+#         X_acq_opt += np.random.normal(0, acq_noise, np.shape(X_acq_opt))
+#         X_acq_opt[:, 0] = np.clip(X_acq_opt[:, 0], 0, 1)
+#         X_acq_opt[:, 1] = np.clip(X_acq_opt[:, 1], 0, 1)
 
-        y_acq = y_input(X_acq_opt) # TODO: should probably be passed as argument
+#         y_acq = y_input(X_acq_opt) # TODO: should probably be passed as argument
 
-        x = np.r_[m.X, X_acq_opt]
-        y = np.r_[m.Y, y_acq]
+#         x = np.r_[m.X, X_acq_opt]
+#         y = np.r_[m.Y, y_acq]
 
-        x = np.r_[x, np.flip(X_acq_opt, axis = 1)]
-        y = np.r_[y, 1 - y_acq]
-    thiskern = m.kern.copy()
-    # It seems that GPy will do some optimization unless you make copies of everything
-    m = GPy.models.GPClassification(x, y,kernel = kern, likelihood = lik_link, inference_method = laplace_inf)
-    if (i % n_opt) == 0:
-        m.optimize()
-    return(m)
+#         x = np.r_[x, np.flip(X_acq_opt, axis = 1)]
+#         y = np.r_[y, 1 - y_acq]
+#     thiskern = m.kern.copy()
+#     # It seems that GPy will do some optimization unless you make copies of everything
+#     m = GPy.models.GPClassification(x, y,kernel = kern, likelihood = lik_link, inference_method = laplace_inf)
+#     if (i % n_opt) == 0:
+#         m.optimize()
+#     return(m)
 
 
 # # In[63]:
