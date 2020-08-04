@@ -298,13 +298,17 @@ server <- function(input, output, session) {
 	output$barplot_left <- renderPlot({
 		barplot(
 			height = X$plots_heights[[1]],
-			names.arg = seq_along(X$plots_heights[[1]])
+			names.arg = seq_along(X$plots_heights[[1]]),
+			col = rgb(.2, .3, .5),
+			border=NA
 		)
 	})
 	output$barplot_right <- renderPlot({
 		barplot(
 			height = X$plots_heights[[2]],
-			names.arg = seq_along(X$plots_heights[[2]])
+			names.arg = seq_along(X$plots_heights[[2]]),
+			col = rgb(.2, .3, .5),
+			border=NA
 		)
 	})
 
