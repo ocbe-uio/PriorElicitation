@@ -1,3 +1,5 @@
+# This script contains the backend (server) operations of the Shiny app
+
 library(reticulate)
 library(shiny)
 library(rdrop2)
@@ -8,16 +10,11 @@ virtualenv_create(
 	envname = "python_environment",
 	python  = "python3"
 )
-virtualenv_remove(envname = "python_environment", packages = "pip")
-virtualenv_install(envname = "python_environment", packages = "pip")
 virtualenv_install(
-	envname          = "python_environment",
-	packages         = c(
-		"numpy", "GPy", "matplotlib", "IPython",
-		"scipy"
-	)
+	envname = "python_environment",
+	packages = c("numpy", "GPy", "matplotlib", "python-dateutil")
 )
-use_virtualenv("python_environment", required = TRUE)
+use_virtualenv("python_environment", required = FALSE)
 
 # Initializing Python and R constants and functions ==========================
 
@@ -25,68 +22,6 @@ source_python("initialObjects.py")
 source_python("functions-veri.py")
 source_python("functions-pari.py")
 if (debug) message("##### Running in debug mode #####")
-
-# Defining user interface ====================================================
-
-ui <- fluidPage(
-	titlePanel("Prior elicitation"),
-	sidebarLayout(
-		position = "left",
-		sidebarPanel(
-			conditionalPanel(
-				condition = "input.start_veri",
-				"Decision", br(),
-				actionButton(
-					inputId = "realistic",
-					label = "Number is realistic",
-					style = "background-color:#00BB00"
-				),
-				actionButton(
-					inputId = "unrealistic",
-					label = "Number is not realistic",
-					style = "background-color:#BB0000"
-				)
-			),
-			conditionalPanel(
-				condition = "input.start_pari",
-				"Decision", br(),
-				actionButton(
-					inputId = "choose_left",
-					label = "Left plot is more realistic"
-				),
-				actionButton(
-					inputId = "choose_right",
-					label = "Right plot is more realistic"
-				)
-			)
-		),
-		mainPanel(
-			tabsetPanel(
-				type = "tabs",
-				selected = "Pari-PRECIOUS",
-				tabPanel(
-					"Veri-PRECIOUS",
-					actionLink("start_veri", "Click here to start"), br(),
-					fluidRow(
-						column(3, h1("Number: ")),
-						column(2, h1(textOutput("ss")))
-					),
-					fluidRow(
-						column(2, h6("Round: ")),
-						column(3, h6(textOutput("i")))
-					),
-					h2(uiOutput("final_link"))
-				),
-				tabPanel(
-					"Pari-PRECIOUS",
-					actionLink("start_pari", "Click here to start"), br(),
-					plotOutput("barplot_left"),
-					plotOutput("barplot_right")
-				)
-			)
-		)
-	)
-)
 
 # Define server logic ========================================================
 
@@ -101,10 +36,14 @@ server <- function(input, output, session) {
 	model <- reactiveValues(fit = NULL)
 	proxy <- reactiveValues(lik = 0, post = 0, pred_f = NULL)
 	i <- reactiveValues(i = 0, round1over = FALSE, round2over = FALSE)
+	n <- reactiveValues(init = 0, tot = 0)
 
 	# Starting Veri or Pari-PRECIOUS -----------------------------------------
 	observeEvent(input$start_veri, {
-		init_x_values <- init_X("veri")
+		all_n <- init_n(debug, "veri")
+		n$init <- all_n[[1]]
+		n$tot <- all_n[[2]]
+		init_x_values <- init_X("veri", n$init)
 		Xtrain <- init_x_values[[1]]
 		X$grid  <- init_x_values[[2]]
 		if (i$i == 0) {
@@ -118,7 +57,8 @@ server <- function(input, output, session) {
 		}
 	})
 	observeEvent(input$start_pari, {
-		init_x_values <- init_X("pari")
+		temp_n_init <- init_n(debug, "veri")[[1]]
+		init_x_values <- init_X("pari", temp_n_init)
 		init_grid_indices      <- init_x_values[[1]]
 		anti_init_grid_indices <- init_x_values[[2]]
 		Xtrain                 <- init_x_values[[3]]
@@ -140,12 +80,15 @@ server <- function(input, output, session) {
 			}
 			generate_X_plots_heights()
 		}
+		all_n <- init_n(debug, "pari")
+		n$init <- all_n[[1]]
+		n$tot <- all_n[[2]]
 	})
 
 	# Creating function to fit model -----------------------------------------
 	fit_model_veri <- reactive({
-		if (i$i > n_init) {
-			if (i$i == n_init + 1) {
+		if (i$i > n$init) {
+			if (i$i == n$init + 1) {
 				model_fit_veri(
 					as.matrix(X$permutated),
 					as.matrix(decisions$series)
@@ -161,15 +104,43 @@ server <- function(input, output, session) {
 		}
 	})
 
+	fit_model_pari <- reactive({
+		if (i$i > n$init) {
+			# Reshaping X and Y ------------------------------------------------
+			temp_n_init <- init_n(debug, "veri")[[1]]
+			trainfull <- reshapeXY(
+				temp_n_init, as.matrix(decisions$series == "left")
+			)
+			Xtrainfull <- trainfull[[1]]
+			Ytrainfull <- trainfull[[2]]
+			# Fitting (or refitting) model -------------------------------------
+			if (i$i == n$init + 1) {
+				model_fit_pari(
+					Xtrainfull,
+					Ytrainfull
+				)
+			} else {
+				# TODO: develop Python part and adapt
+				browser() # TEMP
+				model_update_veri(
+					model$fit,
+					as.matrix(X$latest),
+					as.matrix(decisions$latest),
+					i$i, n_opt
+				)
+			}
+		}
+	})
+
 	# Creating function to retrieve theta (X) --------------------------------
 
 	get_X <- reactive({ # Used by Veri
 		# Function to retrieve the thetas (Xs) depending on which stage we are
 		# Results of this function are one number
-		if (i$i <= n_init) {
+		if (i$i <= n$init) {
 			# First round: gather values from pre-generated probability grid
 			X$permutated[i$i]
-		} else if (i$i <= n_tot) {
+		} else if (i$i <= n$tot) {
 			# Second round: gather values from model
 			model$fit <- fit_model_veri()
 			if (debug) print(model$fit)
@@ -179,12 +150,17 @@ server <- function(input, output, session) {
 
 	get_X_pairs <- reactive({ # Used by Pari
 		# Results of this function are pairs of numbers
-		if (i$i <= n_init) {
+		if (i$i <= n$init) {
 			# First round: gather values from pre-generated probability grid
 			X$permutated[i$i, ]
-		} else if (i$i <= n_tot) {
+		} else if (i$i <= n$tot) {
 			# Second round: gather values from model
-			stop("Under construction") # TODO: implement In >= [51]
+			model$fit <- fit_model_pari()
+			if (debug) print(model$fit)
+			# TODO: add acquire_X_pari to fix post-modeling offer
+			stop("Reqacuiring X not yet implemented")
+			browser() # TEMP
+			acquire_X_pari() # FIXME: should be f(model, X)
 		}
 	})
 
@@ -192,7 +168,7 @@ server <- function(input, output, session) {
 
 	generate_X_ss <- reactive({ # Used by Veri
 		i$i <- i$i + 1
-		if (i$i <= n_tot) {
+		if (i$i <= n$tot) {
 			X$latest <- get_X()
 			X$series <- append(X$series, X$latest)
 			sim_result$latest <- gen_sim(X$latest)
@@ -206,10 +182,11 @@ server <- function(input, output, session) {
 
 	generate_X_plots_heights <- reactive({ # Used by Pari
 		i$i <- i$i + 1
-		if (i$i <= n_tot) {
-			X$latest <- get_X_pairs()
+		if (i$i <= n$tot) {
+			X$latest <- get_X_pairs() # FIXME: broken for i$i > n$init
 			X$plots_heights <- gen_X_plots_values(X$latest)
 			if (debug) {
+				message("Round ", i$i)
 				print(X$latest)
 				print(X$plots_heights)
 			}
@@ -219,7 +196,7 @@ server <- function(input, output, session) {
 
 	# Recording judgements ---------------------------------------------------
 	observeEvent(input$realistic, {
-		if (i$i <= n_tot) {
+		if (i$i <= n$tot) {
 			# Record latest decision
 			decisions$latest <- 1
 			decisions$series <- append(decisions$series, 1)
@@ -227,7 +204,7 @@ server <- function(input, output, session) {
 		}
 	})
 	observeEvent(input$unrealistic, {
-		if (i$i <= n_tot) {
+		if (i$i <= n$tot) {
 			# Record latest decision
 			decisions$latest <- 0
 			decisions$series <- append(decisions$series, 0)
@@ -235,14 +212,14 @@ server <- function(input, output, session) {
 		}
 	})
 	observeEvent(input$choose_left, {
-			if (i$i <= n_tot) {
+			if (i$i <= n$tot) {
 			decisions$latest <- "left"
 			decisions$series <- append(decisions$series, "left")
 			generate_X_plots_heights()
 		}
 	})
 	observeEvent(input$choose_right, {
-			if (i$i <= n_tot) {
+			if (i$i <= n$tot) {
 			decisions$latest <- "right"
 			decisions$series <- append(decisions$series, "right")
 			generate_X_plots_heights()
@@ -251,8 +228,8 @@ server <- function(input, output, session) {
 
 	# Final calculations -----------------------------------------------------
 
-	observe({
-		if (i$i > n_tot) {
+	observe({ # TODO: split veri and pari?
+		if (i$i > n$tot) {
 			# Calculating lik_proxy and post_proxy (after experiment is over)
 			proxy$lik <- calc_lik_proxy_veri(model$fit, X$grid)
 			proxy$post <- calc_post_proxy(proxy$lik)
@@ -261,7 +238,7 @@ server <- function(input, output, session) {
 			# Final link
 			url <- a("CLICK HERE", href="http://www.uio.no")
 			output$final_link <- renderUI({
-				if (i$i > n_tot) {
+				if (i$i > n$tot) {
 					tagList(
 						"Thank you for your contribution! Please", url,
 						"to submit your results",
@@ -281,13 +258,17 @@ server <- function(input, output, session) {
 	output$barplot_left <- renderPlot({
 		barplot(
 			height = X$plots_heights[[1]],
-			names.arg = seq_along(X$plots_heights[[1]])
+			names.arg = seq_along(X$plots_heights[[1]]),
+			col = rgb(.2, .3, .5),
+			border=NA
 		)
 	})
 	output$barplot_right <- renderPlot({
 		barplot(
 			height = X$plots_heights[[2]],
-			names.arg = seq_along(X$plots_heights[[2]])
+			names.arg = seq_along(X$plots_heights[[2]]),
+			col = rgb(.2, .3, .5),
+			border=NA
 		)
 	})
 
@@ -326,7 +307,3 @@ server <- function(input, output, session) {
 		stopApp()
 	})
 }
-
-# Run the app ================================================================
-
-shinyApp(ui, server)

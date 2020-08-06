@@ -7,25 +7,26 @@ import numpy as np
 # ==============================================================================
 debug = True
 
-
-def set_n(debug):
-    if debug:
-        n_init = 10
-        n_update = 10
-    else:
-        n_init = 21
-        n_update = 79
-    return(n_init, n_update)
-
-
-n_init, n_update = set_n(debug)
-n_tot = n_init + n_update
 n_opt = 5
 plotting = False
 simulations = []
 
+def init_n(debug, precious_type):
+    if debug:
+        n_init = 5
+        n_update = 10
+    else:
+        n_init = 21
+        n_update = 79
+    if precious_type == "pari":
+        # See issue #1 for details
+        # https://github.com/ocbe-uio/PriorElicitation/issues/1#issuecomment-664196098
+        n_init = n_init * (n_init + 1) / 2
+        n_update = n_update * (n_update + 1) / 2
+    n_tot = n_init + n_update
+    return(n_init, n_tot)
 
-def init_X(precious_type):
+def init_X(precious_type, n_init):
     if precious_type == "veri":
         Xtrain = np.expand_dims(np.linspace(0, 1, n_init), axis=1)
         Xgrid = np.expand_dims(np.linspace(0, 1, 2001), axis=1)
