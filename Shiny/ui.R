@@ -23,15 +23,21 @@ ui <- fluidPage(
 				"Decision", br(),
 				actionButton(
 					inputId = "choose_left",
-					label = "Left plot is more realistic"
+					label = "Left/top plot is more realistic"
 				),
 				actionButton(
 					inputId = "choose_right",
-					label = "Right plot is more realistic"
+					label = "Right/bottom plot is more realistic"
 				)
 			)
 		),
 		mainPanel(
+			fluidRow(
+				column(1, h6("Round: ")),
+				column(1, h6(textOutput("i"))),
+				column(1, h6(" of ")),
+				column(1, h6(textOutput("ntot")))
+			),
 			tabsetPanel(
 				type = "tabs",
 				selected = "Pari-PRECIOUS",
@@ -41,10 +47,6 @@ ui <- fluidPage(
 					fluidRow(
 						column(3, h1("Number: ")),
 						column(2, h1(textOutput("ss")))
-					),
-					fluidRow(
-						column(2, h6("Round: ")),
-						column(3, h6(textOutput("i")))
 					),
 					h2(uiOutput("final_link"))
 				),
