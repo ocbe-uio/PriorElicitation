@@ -45,7 +45,7 @@ server <- function(input, output, session) {
 		n$tot <- all_n[[2]]
 		init_x_values <- init_X("veri", n$init)
 		Xtrain <- init_x_values[[1]]
-		X$grid  <- init_x_values[[2]]
+		X$grid <- init_x_values[[2]]
 		if (i$i == 0) {
 			if (debug) {
 				# not rearranging X makes debugging easier
@@ -81,8 +81,8 @@ server <- function(input, output, session) {
 			generate_X_plots_heights()
 		}
 		all_n <- init_n(debug, "pari")
-		n$init <- all_n[[1]]
-		n$tot <- all_n[[2]]
+		n$init <- as.integer(all_n[[1]])
+		n$tot <- as.integer(all_n[[2]])
 	})
 
 	# Creating function to fit model -----------------------------------------
@@ -121,8 +121,9 @@ server <- function(input, output, session) {
 				)
 			} else {
 				# TODO: develop Python part and adapt
+				stop("Remodeling to be implemented") # TEMP
 				browser() # TEMP
-				model_update_veri(
+				model_update_pari(
 					model$fit,
 					as.matrix(X$latest),
 					as.matrix(decisions$latest),
@@ -157,10 +158,7 @@ server <- function(input, output, session) {
 			# Second round: gather values from model
 			model$fit <- fit_model_pari()
 			if (debug) print(model$fit)
-			# TODO: add acquire_X_pari to fix post-modeling offer
-			stop("Reqacuiring X not yet implemented")
-			browser() # TEMP
-			acquire_X_pari() # FIXME: should be f(model, X)
+			acquire_X_pari(model$fit, 51L) # ASK: Is n_test fixed? Why?
 		}
 	})
 
@@ -183,8 +181,8 @@ server <- function(input, output, session) {
 	generate_X_plots_heights <- reactive({ # Used by Pari
 		i$i <- i$i + 1
 		if (i$i <= n$tot) {
-			X$latest <- get_X_pairs() # FIXME: broken for i$i > n$init
-			X$plots_heights <- gen_X_plots_values(X$latest)
+			X$latest <- get_X_pairs()
+			X$plots_heights <- gen_X_plots_values(as.list(X$latest))
 			if (debug) {
 				message("Round ", i$i)
 				print(X$latest)
@@ -295,6 +293,7 @@ server <- function(input, output, session) {
 			message("Exported list structure:")
 			print(str(saved_objects))
 			lapply(saved_objects, summary)
+			message("Theta and label acquisitions:")
 			print(cbind(
 				saved_objects$theta_acquisitions,
 				saved_objects$label_acquisitions

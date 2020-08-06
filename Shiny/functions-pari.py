@@ -123,7 +123,7 @@ def model_fit_pari(Xtrainfull, ytrainfull):
 
 # # In[53]:
 
-def acquire_X_pari(n_test):
+def acquire_X_pari(m, n_test=51, acq_noise=0.1):
     test_grid_indices = np.triu_indices(n_test)
 
     X1test = np.expand_dims(np.linspace(0, 1, n_test), axis = 1)
@@ -132,18 +132,27 @@ def acquire_X_pari(n_test):
     X1testgrid, X2testgrid = np.meshgrid(X1test, X2test)
 
     Xtest = np.concatenate(
-        (np.reshape(X1testgrid, (-1, 1)), np.reshape(X2testgrid, (-1, 1))),
-        axis=1
-    )
-
-    Xacq = np.concatenate(
         (
-            np.reshape(X1testgrid[test_grid_indices], (-1, 1)),
-            np.reshape(X2testgrid[test_grid_indices], (-1, 1))
+            np.reshape(X1testgrid, (-1, 1)),
+            np.reshape(X2testgrid, (-1, 1))
         ),
         axis=1
     )
-    return(X_acq)
+
+    # Xacq = np.concatenate(
+    #     (
+    #         np.reshape(X1testgrid[test_grid_indices], (-1, 1)),
+    #         np.reshape(X2testgrid[test_grid_indices], (-1, 1))
+    #     ),
+    #     axis=1
+    # )
+    thisXacq = Xtest.copy()
+    X_acq_opt = dts_acquisition_X(m, thisXacq)
+    X_acq_opt += np.random.normal(0, acq_noise, np.shape(X_acq_opt))
+    X_acq_opt[:, 0] = np.clip(X_acq_opt[:, 0], 0, 1)
+    X_acq_opt[:, 1] = np.clip(X_acq_opt[:, 1], 0, 1)
+    return(X_acq_opt)
+
 
 
 # # In[54]:
@@ -158,15 +167,7 @@ def calc_lik_proxy_pari(m, Xtest, n_test=51):
 # n_update = 50 - int(.5 * n_init ** 2) - 3
 
 # In[62]:
-def model_update_pari(m, Xtest, y_acq, acq_noise=0.1):
-    thisXacq = Xtest.copy()
-    X_acq_opt = dts_acquisition_X(m, thisXacq)
-    X_acq_opt += np.random.normal(0, acq_noise, np.shape(X_acq_opt))
-    X_acq_opt[:, 0] = np.clip(X_acq_opt[:, 0], 0, 1)
-    X_acq_opt[:, 1] = np.clip(X_acq_opt[:, 1], 0, 1)
-
-    # y_acq = y_input(X_acq_opt) # TODO: should be passed as argument
-
+def model_update_pari(m, X_acq_opt, y_acq, acq_noise=0.1):
     x = np.r_[m.X, X_acq_opt]
     y = np.r_[m.Y, y_acq]
 
