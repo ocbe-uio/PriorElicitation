@@ -67,6 +67,7 @@ server <- function(input, output, session) {
 		X1traingrid            <- init_x_values[[6]]
 		X2traingrid            <- init_x_values[[7]]
 		Xtrain                 <- init_x_values[[8]]
+		X$grid                 <- acquire_Xtest(51L) # ASK: n_test fixed? Why?
 		if (i$i == 0) {
 			if (debug) {
 				# not rearranging X makes debugging easier
@@ -155,7 +156,7 @@ server <- function(input, output, session) {
 			# Second round: gather values from model
 			model$fit <- fit_model_pari()
 			if (debug) print(model$fit)
-			acquire_X_pari(model$fit, 51L) # ASK: Is n_test fixed? Why?
+			acquire_X_pari(model$fit, X$grid)
 		}
 	})
 

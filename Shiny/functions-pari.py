@@ -98,10 +98,10 @@ def model_fit_pari(Xtrainfull, ytrainfull):
     m.optimize()  # first runs EP and then optimizes the kernel parameters
     return(m)
 
-
 # # In[53]:
 
-def acquire_X_pari(m, n_test=51, acq_noise=0.1):
+
+def acquire_Xtest(n_test=51):
     test_grid_indices = np.triu_indices(n_test)
 
     X1test = np.expand_dims(np.linspace(0, 1, n_test), axis = 1)
@@ -116,6 +116,7 @@ def acquire_X_pari(m, n_test=51, acq_noise=0.1):
         ),
         axis=1
     )
+    return(Xtest)
 
 # In[47]:
 
@@ -159,13 +160,8 @@ def dts_acquisition_X(m, X):
     )
     return(X_acq)
 
-    # Xacq = np.concatenate(
-    #     (
-    #         np.reshape(X1testgrid[test_grid_indices], (-1, 1)),
-    #         np.reshape(X2testgrid[test_grid_indices], (-1, 1))
-    #     ),
-    #     axis=1
-    # )
+
+def acquire_X_pari(m, Xtest, acq_noise=0.1):
     thisXacq = Xtest.copy()
     X_acq_opt = dts_acquisition_X(m, thisXacq)
     X_acq_opt += np.random.normal(0, acq_noise, np.shape(X_acq_opt))
