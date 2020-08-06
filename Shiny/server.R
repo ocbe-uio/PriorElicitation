@@ -249,6 +249,7 @@ server <- function(input, output, session) {
 	# Controls for development -----------------------------------------------
 
 	output$i <- renderText(i$i)
+	output$ntot <- renderText(n$tot)
 	output$ss <- renderText(sim_result$latest)
 	output$barplot_left <- renderPlot({
 		barplot(
