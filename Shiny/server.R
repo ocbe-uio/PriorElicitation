@@ -106,22 +106,22 @@ server <- function(input, output, session) {
 
 	fit_model_pari <- reactive({
 		if (i$i > n$init) {
+			# Reshaping X and Y ------------------------------------------------
+			temp_n_init <- init_n(debug, "veri")[[1]]
 			trainfull <- reshapeXY(
-				n$init, as.matrix(decisions$series == "left")
+				temp_n_init, as.matrix(decisions$series == "left")
 			)
 			Xtrainfull <- trainfull[[1]]
 			Ytrainfull <- trainfull[[2]]
+			# Fitting (or refitting) model -------------------------------------
 			if (i$i == n$init + 1) {
 				model_fit_pari(
 					Xtrainfull,
 					Ytrainfull
 				)
-				model_fit_pari(
-					as.matrix(X$permutated),
-					as.matrix(decisions$series == "left")
-				)
 			} else {
 				# TODO: develop Python part and adapt
+				browser() # TEMP
 				model_update_veri(
 					model$fit,
 					as.matrix(X$latest),
@@ -157,6 +157,10 @@ server <- function(input, output, session) {
 			# Second round: gather values from model
 			model$fit <- fit_model_pari()
 			if (debug) print(model$fit)
+			# TODO: add acquire_X_pari to fix post-modeling offer
+			stop("Reqacuiring X not yet implemented")
+			browser() # TEMP
+			acquire_X_pari() # FIXME: should be f(model, X)
 		}
 	})
 
@@ -179,7 +183,7 @@ server <- function(input, output, session) {
 	generate_X_plots_heights <- reactive({ # Used by Pari
 		i$i <- i$i + 1
 		if (i$i <= n$tot) {
-			X$latest <- get_X_pairs()
+			X$latest <- get_X_pairs() # FIXME: broken for i$i > n$init
 			X$plots_heights <- gen_X_plots_values(X$latest)
 			if (debug) {
 				message("Round ", i$i)

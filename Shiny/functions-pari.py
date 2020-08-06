@@ -85,7 +85,7 @@ def dts_acquisition_X(m, X):
 # In[51]:
 
 
-def reshapeXY(n_ini, ytrain):
+def reshapeXY(n_init, ytrain):
     # Xtrain
     init_grid_indices=np.triu_indices(n_init)
     X1train=np.linspace(0,1,n_init)
@@ -125,7 +125,7 @@ def model_fit_pari(Xtrainfull, ytrainfull):
 
 # # In[53]:
 
-def acquire_X_pari(n_test=51):
+def acquire_X_pari(n_test):
     test_grid_indices = np.triu_indices(n_test)
 
     X1test = np.expand_dims(np.linspace(0, 1, n_test), axis = 1)
@@ -191,73 +191,6 @@ def model_update_pari(m, Xtest, y_acq, acq_noise=0.1):
     if (i % n_opt) == 0:
         m.optimize()
     return(m)
-
-
-# # In[63]:
-
-
-# lik_proxy = np.exp(m.predict_noiseless(Xtest)[0])
-# loglik_proxy = m.predict_noiseless(Xtest)[0]
-# loglik_proxy = np.reshape(loglik_proxy, (n_test, n_test))
-# lik_proxy = np.reshape(lik_proxy, (n_test, n_test))
-
-
-# # In[64]:
-
-
-# m
-
-
-# # In[65]:
-
-
-# m.optimize()
-
-
-# # In[66]:
-
-
-# plt.contour(X1testgrid, X2testgrid, lik_proxy)
-
-
-# # In[67]:
-
-
-# plt.contour(X1testgrid, X2testgrid, np.log(lik_proxy))
-
-
-# # In[68]:
-
-
-# arg_real = np.nonzero(m.Y)
-# arg_fake = np.nonzero(1-m.Y)
-
-
-# plt.scatter(m.X[arg_real, 0], m.X[arg_real, 1], c = 'b')
-# plt.scatter(m.X[arg_fake, 0], m.X[arg_fake, 1], c = 'r')
-
-
-# # In[69]:
-
-
-# a, b = np.unravel_index(np.argmax(lik_proxy), (n_test, n_test))
-# plt.plot(X1test, lik_proxy[b, :])
-# plt.show()
-
-
-# # In[70]:
-
-
-# #ADD PERSON'S NAME!!!!
-# person = 'mari'
-# country = 'usa'
-
-
-# # In[71]:
-
-
-# path = './preferenceresults/'+person+'_'+country+'u'
-
 
 # # In[72]:
 
