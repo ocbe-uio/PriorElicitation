@@ -185,7 +185,7 @@ server <- function(input, output, session) {
 				print(X$latest)
 				print(X$plots_heights)
 			}
-			X$series <- append(X$series, X$latest)
+			X$series <- rbind(X$series, X$latest)
 		}
 	})
 
@@ -291,10 +291,12 @@ server <- function(input, output, session) {
 			print(str(saved_objects))
 			lapply(saved_objects, summary)
 			message("Theta and label acquisitions:")
-			print(cbind(
-				saved_objects$theta_acquisitions,
-				saved_objects$label_acquisitions
-			))
+			print(
+				data.frame(
+					saved_objects$theta_acquisitions,
+					saved_objects$label_acquisitions
+				)
+			)
 		} else {
 			saveRDS(saved_objects, file = paste0(file_name, ".rds"))
 			drop_upload(paste0(file_name, ".rds"))
