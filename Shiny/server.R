@@ -120,13 +120,10 @@ server <- function(input, output, session) {
 					Ytrainfull
 				)
 			} else {
-				# TODO: develop Python part and adapt
-				stop("Remodeling to be implemented") # TEMP
-				browser() # TEMP
 				model_update_pari(
 					model$fit,
 					as.matrix(X$latest),
-					as.matrix(decisions$latest),
+					as.matrix(decisions$latest == "left"),
 					i$i, n_opt
 				)
 			}

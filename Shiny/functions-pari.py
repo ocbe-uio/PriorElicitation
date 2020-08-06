@@ -167,7 +167,7 @@ def calc_lik_proxy_pari(m, Xtest, n_test=51):
 # n_update = 50 - int(.5 * n_init ** 2) - 3
 
 # In[62]:
-def model_update_pari(m, X_acq_opt, y_acq, acq_noise=0.1):
+def model_update_pari(m, X_acq_opt, y_acq, i, n_opt):
     x = np.r_[m.X, X_acq_opt]
     y = np.r_[m.Y, y_acq]
 
