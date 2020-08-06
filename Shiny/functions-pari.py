@@ -85,7 +85,14 @@ def dts_acquisition_X(m, X):
 # In[51]:
 
 
-def reshapeXY(X1traingrid, X2traingrid, ytrain, Xtrain):
+def reshapeXY(n_ini, ytrain):
+    # Xtrain
+    init_grid_indices=np.triu_indices(n_init)
+    X1train=np.linspace(0,1,n_init)
+    X2train=np.linspace(0,1,n_init)
+    X1traingrid,X2traingrid=np.meshgrid(X1train, X2train)
+    Xtrain=np.concatenate((np.reshape(X1traingrid[init_grid_indices],(-1,1)),np.reshape(X2traingrid[init_grid_indices],(-1,1))),axis=1)
+    # X/Ytrainmirror
     X2grid_reshaped = np.reshape(X2traingrid[init_grid_indices], (-1, 1))
     X1grid_reshaped = np.reshape(X1traingrid[init_grid_indices], (-1, 1))
     Xtrainmirror = np.concatenate((X2grid_reshaped, X1grid_reshaped), axis=1)
@@ -95,10 +102,9 @@ def reshapeXY(X1traingrid, X2traingrid, ytrain, Xtrain):
     ytrainfull = np.concatenate((ytrain, ytrainmirror), axis=0)
     return(Xtrainfull, ytrainfull)
 
-
 # # In[52]:
 
-def model_fit_pari():
+def model_fit_pari(Xtrainfull, ytrainfull):
     # Kernel
     kern = GPy.kern.Matern32(input_dim=1, active_dims=0) \
         + GPy.kern.Matern32(input_dim=1, active_dims=1)
@@ -151,31 +157,40 @@ def calc_lik_proxy_pari(m, Xtest, n_test=51):
     lik_proxy = np.reshape(lik_proxy, (n_test, n_test))
     return(lik_proxy)
 
+# n_update = 50 - int(.5 * n_init ** 2) - 3
+
 # In[62]:
+def model_update_pari(m, Xtest, y_acq, acq_noise=0.1):
+    thisXacq = Xtest.copy()
+    X_acq_opt = dts_acquisition_X(m, thisXacq)
+    X_acq_opt += np.random.normal(0, acq_noise, np.shape(X_acq_opt))
+    X_acq_opt[:, 0] = np.clip(X_acq_opt[:, 0], 0, 1)
+    X_acq_opt[:, 1] = np.clip(X_acq_opt[:, 1], 0, 1)
 
-# def model_update_pari(m, Xtest, n_init, acq_noise=0.1):
-#     n_update = 50 - int(.5 * n_init ** 2) - 3
-#     for i in range(n_update):
-#         # TODO: mode loop out of function (requires user intervention)
-#         thisXacq = Xtest.copy()
-#         X_acq_opt = dts_acquisition_X(m, thisXacq)
-#         X_acq_opt += np.random.normal(0, acq_noise, np.shape(X_acq_opt))
-#         X_acq_opt[:, 0] = np.clip(X_acq_opt[:, 0], 0, 1)
-#         X_acq_opt[:, 1] = np.clip(X_acq_opt[:, 1], 0, 1)
+    # y_acq = y_input(X_acq_opt) # TODO: should be passed as argument
 
-#         y_acq = y_input(X_acq_opt) # TODO: should probably be passed as argument
+    x = np.r_[m.X, X_acq_opt]
+    y = np.r_[m.Y, y_acq]
 
-#         x = np.r_[m.X, X_acq_opt]
-#         y = np.r_[m.Y, y_acq]
+    x = np.r_[x, np.flip(X_acq_opt, axis = 1)]
+    y = np.r_[y, 1 - y_acq]
 
-#         x = np.r_[x, np.flip(X_acq_opt, axis = 1)]
-#         y = np.r_[y, 1 - y_acq]
-#     thiskern = m.kern.copy()
-#     # It seems that GPy will do some optimization unless you make copies of everything
-#     m = GPy.models.GPClassification(x, y,kernel = kern, likelihood = lik_link, inference_method = laplace_inf)
-#     if (i % n_opt) == 0:
-#         m.optimize()
-#     return(m)
+    thiskern = m.kern.copy()
+    # It seems that GPy will do some optimization unless you make copies of everything
+
+    # Likelihood
+    logit_link = Logit()
+    lik_link = GPy.likelihoods.Bernoulli(gp_link=logit_link)
+    laplace_inf = GPy.inference.latent_function_inference.Laplace()
+
+    m = GPy.models.GPClassification(
+        x, y, kernel = thiskern, likelihood = lik_link,
+        inference_method = laplace_inf
+    )
+
+    if (i % n_opt) == 0:
+        m.optimize()
+    return(m)
 
 
 # # In[63]:

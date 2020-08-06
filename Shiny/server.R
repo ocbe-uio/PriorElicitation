@@ -12,7 +12,7 @@ virtualenv_create(
 )
 virtualenv_install(
 	envname = "python_environment",
-	packages = c("numpy", "GPy", "matplotlib")
+	packages = c("numpy", "GPy", "matplotlib", "python-dateutil")
 )
 use_virtualenv("python_environment", required = FALSE)
 
@@ -36,10 +36,14 @@ server <- function(input, output, session) {
 	model <- reactiveValues(fit = NULL)
 	proxy <- reactiveValues(lik = 0, post = 0, pred_f = NULL)
 	i <- reactiveValues(i = 0, round1over = FALSE, round2over = FALSE)
+	n <- reactiveValues(init = 0, tot = 0)
 
 	# Starting Veri or Pari-PRECIOUS -----------------------------------------
 	observeEvent(input$start_veri, {
-		init_x_values <- init_X("veri")
+		all_n <- init_n(debug, "veri")
+		n$init <- all_n[[1]]
+		n$tot <- all_n[[2]]
+		init_x_values <- init_X("veri", n$init)
 		Xtrain <- init_x_values[[1]]
 		X$grid  <- init_x_values[[2]]
 		if (i$i == 0) {
@@ -53,7 +57,8 @@ server <- function(input, output, session) {
 		}
 	})
 	observeEvent(input$start_pari, {
-		init_x_values <- init_X("pari")
+		temp_n_init <- init_n(debug, "veri")[[1]]
+		init_x_values <- init_X("pari", temp_n_init)
 		init_grid_indices      <- init_x_values[[1]]
 		anti_init_grid_indices <- init_x_values[[2]]
 		Xtrain                 <- init_x_values[[3]]
@@ -75,12 +80,15 @@ server <- function(input, output, session) {
 			}
 			generate_X_plots_heights()
 		}
+		all_n <- init_n(debug, "pari")
+		n$init <- all_n[[1]]
+		n$tot <- all_n[[2]]
 	})
 
 	# Creating function to fit model -----------------------------------------
 	fit_model_veri <- reactive({
-		if (i$i > n_init) {
-			if (i$i == n_init + 1) {
+		if (i$i > n$init) {
+			if (i$i == n$init + 1) {
 				model_fit_veri(
 					as.matrix(X$permutated),
 					as.matrix(decisions$series)
@@ -97,21 +105,29 @@ server <- function(input, output, session) {
 	})
 
 	fit_model_pari <- reactive({
-		if (i$i > n_init) {
-			if (i$i == n_init + 1) {
-				# TODO: develop Python part and adapt
-				# model_fit_pari(
-				# 	as.matrix(X$permutated),
-				# 	as.matrix(decisions$series)
-				# )
+		if (i$i > n$init) {
+			trainfull <- reshapeXY(
+				n$init, as.matrix(decisions$series == "left")
+			)
+			Xtrainfull <- trainfull[[1]]
+			Ytrainfull <- trainfull[[2]]
+			if (i$i == n$init + 1) {
+				model_fit_pari(
+					Xtrainfull,
+					Ytrainfull
+				)
+				model_fit_pari(
+					as.matrix(X$permutated),
+					as.matrix(decisions$series == "left")
+				)
 			} else {
 				# TODO: develop Python part and adapt
-				# model_update_veri(
-				# 	model$fit,
-				# 	as.matrix(X$latest),
-				# 	as.matrix(decisions$latest),
-				# 	i$i, n_opt
-				# )
+				model_update_veri(
+					model$fit,
+					as.matrix(X$latest),
+					as.matrix(decisions$latest),
+					i$i, n_opt
+				)
 			}
 		}
 	})
@@ -121,10 +137,10 @@ server <- function(input, output, session) {
 	get_X <- reactive({ # Used by Veri
 		# Function to retrieve the thetas (Xs) depending on which stage we are
 		# Results of this function are one number
-		if (i$i <= n_init) {
+		if (i$i <= n$init) {
 			# First round: gather values from pre-generated probability grid
 			X$permutated[i$i]
-		} else if (i$i <= n_tot) {
+		} else if (i$i <= n$tot) {
 			# Second round: gather values from model
 			model$fit <- fit_model_veri()
 			if (debug) print(model$fit)
@@ -134,14 +150,13 @@ server <- function(input, output, session) {
 
 	get_X_pairs <- reactive({ # Used by Pari
 		# Results of this function are pairs of numbers
-		if (i$i <= n_init) {
+		if (i$i <= n$init) {
 			# First round: gather values from pre-generated probability grid
 			X$permutated[i$i, ]
-		} else if (i$i <= n_tot) {
+		} else if (i$i <= n$tot) {
 			# Second round: gather values from model
-			model$fit <- fir_model_pari()
+			model$fit <- fit_model_pari()
 			if (debug) print(model$fit)
-
 		}
 	})
 
@@ -149,7 +164,7 @@ server <- function(input, output, session) {
 
 	generate_X_ss <- reactive({ # Used by Veri
 		i$i <- i$i + 1
-		if (i$i <= n_tot) {
+		if (i$i <= n$tot) {
 			X$latest <- get_X()
 			X$series <- append(X$series, X$latest)
 			sim_result$latest <- gen_sim(X$latest)
@@ -163,10 +178,11 @@ server <- function(input, output, session) {
 
 	generate_X_plots_heights <- reactive({ # Used by Pari
 		i$i <- i$i + 1
-		if (i$i <= n_tot) {
+		if (i$i <= n$tot) {
 			X$latest <- get_X_pairs()
 			X$plots_heights <- gen_X_plots_values(X$latest)
 			if (debug) {
+				message("Round ", i$i)
 				print(X$latest)
 				print(X$plots_heights)
 			}
@@ -176,7 +192,7 @@ server <- function(input, output, session) {
 
 	# Recording judgements ---------------------------------------------------
 	observeEvent(input$realistic, {
-		if (i$i <= n_tot) {
+		if (i$i <= n$tot) {
 			# Record latest decision
 			decisions$latest <- 1
 			decisions$series <- append(decisions$series, 1)
@@ -184,7 +200,7 @@ server <- function(input, output, session) {
 		}
 	})
 	observeEvent(input$unrealistic, {
-		if (i$i <= n_tot) {
+		if (i$i <= n$tot) {
 			# Record latest decision
 			decisions$latest <- 0
 			decisions$series <- append(decisions$series, 0)
@@ -192,14 +208,14 @@ server <- function(input, output, session) {
 		}
 	})
 	observeEvent(input$choose_left, {
-			if (i$i <= n_tot) {
+			if (i$i <= n$tot) {
 			decisions$latest <- "left"
 			decisions$series <- append(decisions$series, "left")
 			generate_X_plots_heights()
 		}
 	})
 	observeEvent(input$choose_right, {
-			if (i$i <= n_tot) {
+			if (i$i <= n$tot) {
 			decisions$latest <- "right"
 			decisions$series <- append(decisions$series, "right")
 			generate_X_plots_heights()
@@ -208,8 +224,8 @@ server <- function(input, output, session) {
 
 	# Final calculations -----------------------------------------------------
 
-	observe({
-		if (i$i > n_tot) {
+	observe({ # TODO: split veri and pari?
+		if (i$i > n$tot) {
 			# Calculating lik_proxy and post_proxy (after experiment is over)
 			proxy$lik <- calc_lik_proxy_veri(model$fit, X$grid)
 			proxy$post <- calc_post_proxy(proxy$lik)
@@ -218,7 +234,7 @@ server <- function(input, output, session) {
 			# Final link
 			url <- a("CLICK HERE", href="http://www.uio.no")
 			output$final_link <- renderUI({
-				if (i$i > n_tot) {
+				if (i$i > n$tot) {
 					tagList(
 						"Thank you for your contribution! Please", url,
 						"to submit your results",
