@@ -8,7 +8,7 @@ library(rdrop2)
 
 virtualenv_create(
 	envname = "python_environment",
-	python  = NULL #"python3"
+	python  = "python3"
 )
 virtualenv_install(
 	envname = "python_environment",
