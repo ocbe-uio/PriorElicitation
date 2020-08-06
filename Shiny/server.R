@@ -179,13 +179,13 @@ server <- function(input, output, session) {
 		i$i <- i$i + 1
 		if (i$i <= n$tot) {
 			X$latest <- get_X_pairs()
+			X$series <- rbind(X$series, X$latest)
 			X$plots_heights <- gen_X_plots_values(as.list(X$latest))
 			if (debug) {
 				message("Round ", i$i)
 				print(X$latest)
 				print(X$plots_heights)
 			}
-			X$series <- rbind(X$series, X$latest)
 		}
 	})
 
@@ -223,7 +223,7 @@ server <- function(input, output, session) {
 
 	# Final calculations -----------------------------------------------------
 
-	observe({ # TODO: split veri and pari?
+	observe({
 		if (i$i > n$tot) {
 			# Calculating lik_proxy and post_proxy (after experiment is over)
 			proxy$lik <- calc_lik_proxy_veri(model$fit, X$grid)
@@ -251,6 +251,9 @@ server <- function(input, output, session) {
 	output$i <- renderText(i$i)
 	output$ntot <- renderText(n$tot)
 	output$ss <- renderText(sim_result$latest)
+
+	# Barplots ---------------------------------------------------------------
+
 	output$barplot_left <- renderPlot({
 		barplot(
 			height = X$plots_heights[[1]],

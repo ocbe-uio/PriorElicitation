@@ -58,28 +58,6 @@ def bald_acquisition(m, X):
     )
     return(term1+term2)
 
-
-# In[47]:
-
-
-def dts_acquisition_X(m, X):
-    pred_noiseless_mean, pred_noiseless_var = m.predict_noiseless(X, full_cov = False)
-    pred_noiseless_samples = np.random.normal(size = (2601, 1000)) * np.sqrt(pred_noiseless_var) + pred_noiseless_mean
-    pred_labels_samples= np.mean(g_log(pred_noiseless_samples), axis = 1)
-    n_this = int(np.sqrt(np.shape(X)[0]))
-    pred_label = np.reshape(pred_labels_samples, (n_this, n_this))
-    copeland = np.argmax(np.sum(pred_label, axis = 0))
-    acq_0 = copeland
-    thisX1grid = np.reshape(X[:, 1], (n_this, n_this))
-    thisX0grid = np.reshape(X[:, 0], (n_this, n_this))
-    X_DTS_grid = np.concatenate((thisX0grid[copeland:copeland+1, :].T, thisX1grid[copeland, 0]*np.ones((n_this, 1))), axis = 1)
-    pred_DTS_mean, pred_DTS_var = m.predict_noiseless(X_DTS_grid, full_cov = True)
-    DTS_samples = np.random.multivariate_normal(mean = pred_DTS_mean[:, 0], cov = pred_DTS_var, size = 500)
-    DTS_samples_var = np.var(DTS_samples, axis = 0)
-    acq_1 = np.argmax(DTS_samples_var)
-    X_acq = np.concatenate((thisX0grid[acq_0:acq_0+1, acq_1:acq_1+1], thisX1grid[acq_0:acq_0+1, acq_1:acq_1+1]), axis = 1)
-    return(X_acq)
-
 # In[51]:
 
 
@@ -139,6 +117,48 @@ def acquire_X_pari(m, n_test=51, acq_noise=0.1):
         axis=1
     )
 
+# In[47]:
+
+
+def dts_acquisition_X(m, X):
+    pred_noiseless_mean, pred_noiseless_var = m.predict_noiseless(
+        X, full_cov = False
+    )
+    #TODO: flexibilize 2601 to nrow(X)
+    pred_noiseless_samples = np.random.normal(size = (2601, 1000)) \
+        * np.sqrt(pred_noiseless_var) \
+        + pred_noiseless_mean
+    pred_labels_samples = np.mean(g_log(pred_noiseless_samples), axis = 1)
+    n_this = int(np.sqrt(np.shape(X)[0]))
+    pred_label = np.reshape(pred_labels_samples, (n_this, n_this))
+    copeland = np.argmax(np.sum(pred_label, axis = 0))
+    acq_0 = copeland
+    thisX1grid = np.reshape(X[:, 1], (n_this, n_this))
+    thisX0grid = np.reshape(X[:, 0], (n_this, n_this))
+    X_DTS_grid = np.concatenate(
+        (
+            thisX0grid[copeland:copeland+1, :].T,
+            thisX1grid[copeland, 0]*np.ones((n_this, 1))
+        ),
+        axis = 1
+    )
+    pred_DTS_mean, pred_DTS_var = m.predict_noiseless(
+        X_DTS_grid, full_cov = True
+    )
+    DTS_samples = np.random.multivariate_normal(
+        mean = pred_DTS_mean[:, 0], cov = pred_DTS_var, size = 500
+    )
+    DTS_samples_var = np.var(DTS_samples, axis = 0)
+    acq_1 = np.argmax(DTS_samples_var)
+    X_acq = np.concatenate(
+        (
+            thisX0grid[acq_0:acq_0+1, acq_1:acq_1+1],
+            thisX1grid[acq_0:acq_0+1, acq_1:acq_1+1]
+        ),
+        axis = 1
+    )
+    return(X_acq)
+
     # Xacq = np.concatenate(
     #     (
     #         np.reshape(X1testgrid[test_grid_indices], (-1, 1)),
@@ -152,8 +172,6 @@ def acquire_X_pari(m, n_test=51, acq_noise=0.1):
     X_acq_opt[:, 0] = np.clip(X_acq_opt[:, 0], 0, 1)
     X_acq_opt[:, 1] = np.clip(X_acq_opt[:, 1], 0, 1)
     return(X_acq_opt)
-
-
 
 # # In[54]:
 
