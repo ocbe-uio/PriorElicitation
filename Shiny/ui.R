@@ -42,7 +42,7 @@ ui <- fluidPage(
 				type = "tabs",
 				selected = "Pari-PRECIOUS",
 				tabPanel(
-					"Veri-PRECIOUS",
+					title = "Veri-PRECIOUS",
 					actionLink("start_veri", "Click here to start"), br(),
 					fluidRow(
 						column(3, h1("Number: ")),
@@ -51,7 +51,7 @@ ui <- fluidPage(
 					h2(uiOutput("final_link_veri"))
 				),
 				tabPanel(
-					"Pari-PRECIOUS",
+					title = "Pari-PRECIOUS",
 					actionLink("start_pari", "Click here to start"), br(),
 					plotOutput("barplot_left"),
 					plotOutput("barplot_right"),
