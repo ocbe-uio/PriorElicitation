@@ -235,7 +235,18 @@ server <- function(input, output, session) {
 
 			# Final link
 			url <- a("CLICK HERE", href="http://www.uio.no")
-			output$final_link <- renderUI({
+			output$final_link_veri <- renderUI({
+				if (i$i > n$tot) {
+					tagList(
+						"Thank you for your contribution! Please", url,
+						"to submit your results",
+						"and conclude your participation."
+					)
+				} else {
+					NULL
+				}
+			})
+			output$final_link_pari <- renderUI({
 				if (i$i > n$tot) {
 					tagList(
 						"Thank you for your contribution! Please", url,
