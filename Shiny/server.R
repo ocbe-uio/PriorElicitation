@@ -71,6 +71,9 @@ server <- function(input, output, session) {
 		X2traingrid            <- init_x_values[[7]]
 		Xtrain                 <- init_x_values[[8]]
 		X$grid                 <- acquire_Xtest(51L) # ASK: n_test fixed? Why?
+		all_n <- init_n(debug, method$name)
+		n$init <- as.integer(all_n[[1]])
+		n$tot <- as.integer(all_n[[2]])
 		if (i$i == 0) {
 			if (debug) {
 				# not rearranging X makes debugging easier
@@ -84,9 +87,6 @@ server <- function(input, output, session) {
 			}
 			generate_X_plots_heights()
 		}
-		all_n <- init_n(debug, method$name)
-		n$init <- as.integer(all_n[[1]])
-		n$tot <- as.integer(all_n[[2]])
 	})
 
 	# Creating function to fit model -----------------------------------------
@@ -297,7 +297,7 @@ server <- function(input, output, session) {
 	session$onSessionEnded(function() {
 		saved_objects <- list(
 			"gpy_params" = isolate(model$fit$param_array),
-			# FIXME: theta_acq and label_acq should match their models counterparts
+			# TODO: make sure theta_acq and label_acq match their models counterparts
 			# when the model updates are fixed
 			"theta_acquisitions" = isolate(X$series), # TODO must match m.X
 			"label_acquisitions" = isolate(decisions$series), # TODO: match m.Y
