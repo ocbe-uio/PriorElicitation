@@ -5,11 +5,12 @@ import numpy as np
 # ==============================================================================
 # Manual debugging switch
 # ==============================================================================
-debug = True
+debug = False
 
 n_opt = 5
 plotting = False
 simulations = []
+
 
 def init_n(debug, precious_type):
     if debug:
@@ -25,6 +26,7 @@ def init_n(debug, precious_type):
         n_update = n_update * (n_update + 1) / 2
     n_tot = n_init + n_update
     return(n_init, n_tot)
+
 
 def init_X(precious_type, n_init):
     if precious_type == "veri":
