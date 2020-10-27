@@ -34,16 +34,18 @@ server <- function(input, output, session) {
 		plots_heights = list(0, 0)
 	) # theta
 	model <- reactiveValues(fit = NULL)
+	method <- reactiveValues(name = NULL)
 	proxy <- reactiveValues(lik = 0, post = 0, pred_f = NULL)
 	i <- reactiveValues(i = 0, round1over = FALSE, round2over = FALSE)
 	n <- reactiveValues(init = 0, tot = 0)
 
 	# Starting Veri or Pari-PRECIOUS -----------------------------------------
 	observeEvent(input$start_veri, {
-		all_n <- init_n(debug, "veri")
+		method$name <- "veri"
+		all_n <- init_n(debug, method$name)
 		n$init <- all_n[[1]]
 		n$tot <- all_n[[2]]
-		init_x_values <- init_X("veri", n$init)
+		init_x_values <- init_X(method$name, n$init)
 		Xtrain <- init_x_values[[1]]
 		X$grid <- init_x_values[[2]]
 		if (i$i == 0) {
@@ -57,8 +59,9 @@ server <- function(input, output, session) {
 		}
 	})
 	observeEvent(input$start_pari, {
-		temp_n_init <- init_n(debug, "veri")[[1]]
-		init_x_values <- init_X("pari", temp_n_init)
+		method$name <- "pari"
+		temp_n_init <- init_n(debug, "veri")[[1]]  # TODO: remember why
+		init_x_values <- init_X(method$name, temp_n_init)
 		init_grid_indices      <- init_x_values[[1]]
 		anti_init_grid_indices <- init_x_values[[2]]
 		Xtrain                 <- init_x_values[[3]]
@@ -81,7 +84,7 @@ server <- function(input, output, session) {
 			}
 			generate_X_plots_heights()
 		}
-		all_n <- init_n(debug, "pari")
+		all_n <- init_n(debug, method$name)
 		n$init <- as.integer(all_n[[1]])
 		n$tot <- as.integer(all_n[[2]])
 	})
@@ -229,7 +232,11 @@ server <- function(input, output, session) {
 	observe({
 		if (i$i > n$tot) {
 			# Calculating lik_proxy and post_proxy (after experiment is over)
-			proxy$lik <- calc_lik_proxy_veri(model$fit, X$grid)
+			if (method$name == "veri") {
+				proxy$lik <- calc_lik_proxy_veri(model$fit, X$grid)
+			} else if (method$name == "pari") {
+				proxy$lik <- calc_lik_proxy_pari(model$fit, X$grid)
+			}
 			proxy$post <- calc_post_proxy(proxy$lik)
 			proxy$pred_f <- calc_pred_f(model$fit, X$grid)
 
