@@ -182,6 +182,8 @@ server <- function(input, output, session) {
 			X$latest <- get_X_pairs()
 			X$series <- rbind(X$series, X$latest)
 			X$plots_heights <- gen_X_plots_values(as.list(X$latest))
+			sim_result$latest <- X$plots_heights
+			sim_result$series <- c(sim_result$series, list(sim_result$latest))
 			if (debug) {
 				message("Round ", i$i)
 				print(X$latest)
