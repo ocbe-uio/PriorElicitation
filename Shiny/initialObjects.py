@@ -13,8 +13,8 @@ simulations = []
 
 def init_n(debug, precious_type):
     if debug:
-        n_init = 5
-        n_update = 10
+        n_init = 4
+        n_update = 5
     else:
         n_init = 21
         n_update = 79
