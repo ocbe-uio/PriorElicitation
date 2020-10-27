@@ -20,31 +20,6 @@ def sample_crp(alpha, theta, n):
     return(membership)
 
 
-def labels_acquisition(m, X):  # TODO: unused. Remove!
-    lik_proxy = m.predict(X)[0]
-    acquisition_label = -np.square(lik_proxy-0.5)
-    return(acquisition_label)
-
-
-def var_acquisition(m, X):  # TODO: unused. Remove!
-    acquisition_f = np.sqrt(pred_f[1])
-    return(acquisition_f)
-
-
-def hPHI(x):  # TODO: unused. Remove!
-    return (-norm.cdf(x) * norm.logcdf(x) - (1 - norm.cdf(x)) * norm.logcdf(-x))
-
-
-def bald_acquisition(m, X):  # TODO: unused. Remove!
-    pred_mean, pred_var = m.predict_noiseless(X)
-    C = np.sqrt((np.pi*np.log(2))/2)
-    term1 = hPHI(pred_mean/np.sqrt(pred_var+1))
-    term2 = (
-        -C * np.exp(-.5 * np.square(pred_mean) / (pred_var + C ** 2))
-        / np.sqrt(pred_var + C ** 2)
-    )
-    return(term1+term2)
-
 def dts_acquisition_X(m, X):
     pred_noiseless_mean, pred_noiseless_var = m.predict_noiseless(
         X, full_cov = False
