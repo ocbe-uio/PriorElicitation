@@ -19,8 +19,8 @@ use_virtualenv("python_environment", required = FALSE)
 # Initializing Python and R constants and functions ==========================
 
 source_python("initialObjects.py")
-source_python("functions-veri.py")
-source_python("functions-pari.py")
+source_python("functions_veri.py")
+source_python("functions_pari.py")
 if (debug) {
 	message("RUNNING IN DEBUG MODE\n", "Flip the switch on initialObjects.py")
 }

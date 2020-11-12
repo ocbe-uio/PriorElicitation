@@ -1,5 +1,6 @@
 import numpy as np
 import GPy
+import functions_veri
 
 # =========================================================================== #
 # Internal functions (called by the external functions below)                 #
@@ -30,7 +31,9 @@ def dts_acquisition_X(m, X):
     pred_noiseless_samples = np.random.normal(size=(2601, 1000)) \
         * np.sqrt(pred_noiseless_var) \
         + pred_noiseless_mean
-    pred_labels_samples = np.mean(g_log(pred_noiseless_samples), axis=1)
+    pred_labels_samples = np.mean(
+        functions_veri.g_log(pred_noiseless_samples), axis=1
+    )
     n_this = int(np.sqrt(np.shape(X)[0]))
     pred_label = np.reshape(pred_labels_samples, (n_this, n_this))
     copeland = np.argmax(np.sum(pred_label, axis=0))
@@ -113,7 +116,7 @@ def model_fit_pari(Xtrainfull, ytrainfull):  # L122
     kern.Mat32.variance.set_prior(GPy.priors.Gamma.from_EV(1., 1.))
     kern.Mat32_1.variance.set_prior(GPy.priors.Gamma.from_EV(1., 1.))
     # Likelihood
-    logit_link = Logit()
+    logit_link = functions_veri.Logit()
     lik_link = GPy.likelihoods.Bernoulli(gp_link=logit_link)
     laplace_inf = GPy.inference.latent_function_inference.Laplace()
     # Model fit
@@ -133,10 +136,11 @@ def model_update_pari(m, X_acq_opt, y_acq, i, n_opt):  # L127
     y = np.r_[y, 1 - y_acq]
 
     thiskern = m.kern.copy()
-    # It seems that GPy will do some optimization unless you make copies of everything
+    # It seems that GPy will do some optimization
+    # unless you make copies of everything
 
     # Likelihood
-    logit_link = Logit()  # class Logit defined on veri script
+    logit_link = functions_veri.Logit()  # class Logit defined on veri script
     lik_link = GPy.likelihoods.Bernoulli(gp_link=logit_link)
     laplace_inf = GPy.inference.latent_function_inference.Laplace()
 
