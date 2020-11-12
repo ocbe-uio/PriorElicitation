@@ -22,7 +22,12 @@ source_python("initialObjects.py")
 source_python("functions_veri.py")
 source_python("functions_pari.py")
 if (debug) {
-	message("RUNNING IN DEBUG MODE\n", "Flip the switch on initialObjects.py")
+	message(
+		"########################################\n",
+		"# ------ RUNNING IN DEBUG MODE ------- #\n",
+		"# Flip the switch on initialObjects.py #\n",
+		"########################################"
+	)
 }
 
 # Define server logic ========================================================
@@ -62,7 +67,7 @@ server <- function(input, output, session) {
 	})
 	observeEvent(input$start_pari, {
 		method$name <- "pari"
-		temp_n_init <- init_n(debug, "veri")[[1]]  # TODO: remember why
+		temp_n_init <- init_n(debug, "veri")[[1]]  # Works around issue #1
 		init_x_values <- init_X(method$name, temp_n_init)
 		init_grid_indices      <- init_x_values[[1]]
 		anti_init_grid_indices <- init_x_values[[2]]
@@ -299,10 +304,10 @@ server <- function(input, output, session) {
 	session$onSessionEnded(function() {
 		saved_objects <- list(
 			"gpy_params" = isolate(model$fit$param_array),
-			# TODO: make sure theta_acq and label_acq match their models counterparts
-			# when the model updates are fixed
-			"theta_acquisitions" = isolate(X$series), # TODO must match m.X
-			"label_acquisitions" = isolate(decisions$series), # TODO: match m.Y
+			# TODO: make sure theta_acq and label_acq match their models
+			# counterparts when the model updates are fixed
+			"theta_acquisitions" = isolate(X$series),
+			"label_acquisitions" = isolate(decisions$series),
 			"theta_grid"         = isolate(X$grid),
 			"lik_proxy"          = isolate(proxy$lik),
 			"post_proxy"         = isolate(proxy$post),
