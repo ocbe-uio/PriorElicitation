@@ -4,3 +4,6 @@ rerun:
 	R -e 'shiny::runApp("Shiny", launch.browser=FALSE, port=7519)'
 deploy:
 	R -e 'rsconnect::deployApp(appDir="Shiny/", appName="elicit", appTitle="Prior Elicitation", forceUpdate=TRUE)'
+clean:
+	trash Shiny/Results_*
+	trash Results_*
