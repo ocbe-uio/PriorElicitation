@@ -1,23 +1,22 @@
 import numpy as np
 import GPy
-from GPy.likelihoods.link_functions import GPTransformation
 
 # =========================================================================== #
-# Internal functions                                                          #
+# Internal functions (called by the external functions below)                 #
 # =========================================================================== #
 
 
 def sample_crp(alpha, theta, n):
     membership = [1]
     for i in range(1, n):
-        probs = [(m - alpha) / (i + theta) for m in membership]
-        + [(theta + len(membership) * alpha) / (i + theta)]
+        probs = ([(m - alpha) / (i + theta) for m in membership]
+                 + [(theta + len(membership) * alpha) / (i + theta)])
         newmember = np.random.multinomial(n=1, pvals=np.array(probs)).tolist()
         if newmember[-1]:
-            membership = membership+[1]
+            membership = membership + [1]
         else:
             membership = [
-                membership[m]+newmember[m] for m in range(len(membership))
+                membership[m] + newmember[m] for m in range(len(membership))
             ]
     membership.sort(reverse=True)
     return(membership)
