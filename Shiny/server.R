@@ -77,7 +77,7 @@ server <- function(input, output, session) {
 		X1traingrid            <- init_x_values[[6]]
 		X2traingrid            <- init_x_values[[7]]
 		Xtrain                 <- init_x_values[[8]]
-		X$grid                 <- acquire_Xtest(51L) # ASK: n_test fixed? Why?
+		X$grid                 <- acquire_Xtest()
 		all_n <- init_n(debug, method$name)
 		n$init <- as.integer(all_n[[1]])
 		n$tot <- as.integer(all_n[[2]])
