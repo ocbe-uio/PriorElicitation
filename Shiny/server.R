@@ -21,7 +21,9 @@ use_virtualenv("python_environment", required = FALSE)
 source_python("initialObjects.py")
 source_python("functions-veri.py")
 source_python("functions-pari.py")
-if (debug) message("##### Running in debug mode #####")
+if (debug) {
+	message("RUNNING IN DEBUG MODE\n", "Flip the switch on initialObjects.py")
+}
 
 # Define server logic ========================================================
 
