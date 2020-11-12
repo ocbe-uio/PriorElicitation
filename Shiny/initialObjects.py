@@ -5,7 +5,7 @@ import numpy as np
 # ==============================================================================
 # Manual debugging switch
 # ==============================================================================
-debug = True
+debug = False
 
 n_opt = 5
 plotting = False
@@ -13,12 +13,18 @@ simulations = []
 
 
 def init_n(debug, precious_type):
+    # Debug or not?
     if debug:
         n_init = 4
-        n_update = 5
+        n_update = 6
     else:
-        n_init = 21
-        n_update = 79
+        if precious_type == "veri":
+            n_init = 21
+            n_update = 79
+        else:
+            n_init = 6
+            n_update = 12
+    # Fixing grid size for pari
     if precious_type == "pari":
         # See issue #1 for details
         # https://github.com/ocbe-uio/PriorElicitation/issues/1#issuecomment-664196098

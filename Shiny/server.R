@@ -67,7 +67,7 @@ server <- function(input, output, session) {
 	})
 	observeEvent(input$start_pari, {
 		method$name <- "pari"
-		temp_n_init <- init_n(debug, "veri")[[1]]  # Works around issue #1
+		temp_n_init <- init_n(debug, "pari-prep")[[1]]  # Works around issue #1
 		init_x_values <- init_X(method$name, temp_n_init)
 		init_grid_indices      <- init_x_values[[1]]
 		anti_init_grid_indices <- init_x_values[[2]]
@@ -118,7 +118,7 @@ server <- function(input, output, session) {
 	fit_model_pari <- reactive({
 		if (i$i > n$init) {
 			# Reshaping X and Y ------------------------------------------------
-			temp_n_init <- init_n(debug, "veri")[[1]]
+			temp_n_init <- init_n(debug, "pari-prep")[[1]]
 			trainfull <- reshapeXY(
 				temp_n_init, as.matrix(decisions$series == "left")
 			)
