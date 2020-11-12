@@ -27,7 +27,6 @@ def dts_acquisition_X(m, X):
     pred_noiseless_mean, pred_noiseless_var = m.predict_noiseless(
         X, full_cov=False
     )
-    # TODO: flexibilize 2601 to nrow(X)
     pred_noiseless_samples = np.random.normal(size=(2601, 1000)) \
         * np.sqrt(pred_noiseless_var) \
         + pred_noiseless_mean

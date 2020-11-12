@@ -1,7 +1,8 @@
 /src/__pycache__
+Shiny/__pycache__
 OriginalPython
 .vscode
 .httr-oauth
 aux
 Shiny/rsconnect/shinyapps.io/ocbe/elicit.dcf
-Shiny/Results_*
+Results_*
