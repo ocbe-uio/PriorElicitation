@@ -21,18 +21,19 @@ ui <- fluidPage(
 					style = "background-color:#BB0000"
 				)
 			),
+			"Please select the more realistic plot:",
 			conditionalPanel(
 				condition = "input.start_pari",
-				"Decision", br(),
 				actionButton(
 					inputId = "choose_left",
-					label = "Left/top plot is more realistic"
+					label = "Left/top"
 				),
 				actionButton(
 					inputId = "choose_right",
-					label = "Right/bottom plot is more realistic"
+					label = "Right/bottom"
 				)
-			)
+			),
+			"(wait until plots are updated to click)"
 		),
 		mainPanel(
 			fluidRow(
