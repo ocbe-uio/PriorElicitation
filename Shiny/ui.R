@@ -1,4 +1,6 @@
 # This script contains the frontend (user) interface of the shiny app.
+library(shinycssloaders)
+
 ui <- fluidPage(
 	titlePanel("Prior elicitation"),
 	sidebarLayout(
@@ -54,8 +56,8 @@ ui <- fluidPage(
 					title = "Pari-PRECIOUS",
 					actionLink("start_pari", "Click here to start"), br(),
 					h2(uiOutput("final_link_pari")),
-					plotOutput("barplot_left"),
-					plotOutput("barplot_right")
+					withSpinner(plotOutput("barplot_left")),
+					withSpinner(plotOutput("barplot_right"))
 				)
 			)
 		)
