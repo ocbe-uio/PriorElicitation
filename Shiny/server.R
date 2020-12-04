@@ -3,6 +3,7 @@
 library(reticulate)
 library(shiny)
 library(rdrop2)
+library(shinyjs)
 
 # Starting the virtual environment ===========================================
 
@@ -221,16 +222,24 @@ server <- function(input, output, session) {
 	})
 	observeEvent(input$choose_left, {
 			if (i$i <= n$tot) {
+			shinyjs::disable("choose_left")
+			shinyjs::disable("choose_right")
 			decisions$latest <- "left"
 			decisions$series <- append(decisions$series, "left")
 			generate_X_plots_heights()
+			shinyjs::enable("choose_left")
+			shinyjs::enable("choose_right")
 		}
 	})
 	observeEvent(input$choose_right, {
 			if (i$i <= n$tot) {
+			shinyjs::disable("choose_left")
+			shinyjs::disable("choose_right")
 			decisions$latest <- "right"
 			decisions$series <- append(decisions$series, "right")
 			generate_X_plots_heights()
+			shinyjs::enable("choose_left")
+			shinyjs::enable("choose_right")
 		}
 	})
 
@@ -289,6 +298,8 @@ server <- function(input, output, session) {
 			col = rgb(.2, .3, .5),
 			border=NA
 		)
+		# shinyjs::enable("choose_left")
+		# shinyjs::enable("choose_right")
 	})
 	output$barplot_right <- renderPlot({
 		barplot(
@@ -297,6 +308,8 @@ server <- function(input, output, session) {
 			col = rgb(.2, .3, .5),
 			border=NA
 		)
+		# shinyjs::enable("choose_left")
+		# shinyjs::enable("choose_right")
 	})
 
 	# Saving output ----------------------------------------------------------

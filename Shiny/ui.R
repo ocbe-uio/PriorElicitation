@@ -1,5 +1,8 @@
 # This script contains the frontend (user) interface of the shiny app.
+library(shinycssloaders)
+
 ui <- fluidPage(
+	shinyjs::useShinyjs(),
 	titlePanel("Prior elicitation"),
 	sidebarLayout(
 		position = "left",
@@ -18,18 +21,19 @@ ui <- fluidPage(
 					style = "background-color:#BB0000"
 				)
 			),
+			"Please select the more realistic plot:",
 			conditionalPanel(
 				condition = "input.start_pari",
-				"Decision", br(),
 				actionButton(
 					inputId = "choose_left",
-					label = "Left/top plot is more realistic"
+					label = "Left/top"
 				),
 				actionButton(
 					inputId = "choose_right",
-					label = "Right/bottom plot is more realistic"
+					label = "Right/bottom"
 				)
-			)
+			),
+			"(wait until plots are updated to click)"
 		),
 		mainPanel(
 			fluidRow(
@@ -54,8 +58,8 @@ ui <- fluidPage(
 					title = "Pari-PRECIOUS",
 					actionLink("start_pari", "Click here to start"), br(),
 					h2(uiOutput("final_link_pari")),
-					plotOutput("barplot_left"),
-					plotOutput("barplot_right")
+					shinycssloaders::withSpinner(plotOutput("barplot_left")),
+					shinycssloaders::withSpinner(plotOutput("barplot_right"))
 				)
 			)
 		)
