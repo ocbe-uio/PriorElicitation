@@ -21,9 +21,9 @@ ui <- fluidPage(
 					style = "background-color:#BB0000"
 				)
 			),
-			"Please select the more realistic plot:",
 			conditionalPanel(
 				condition = "input.start_pari",
+				"Please select the more realistic plot:", br(),
 				actionButton(
 					inputId = "choose_left",
 					label = "Left/top"
@@ -31,16 +31,16 @@ ui <- fluidPage(
 				actionButton(
 					inputId = "choose_right",
 					label = "Right/bottom"
-				)
-			),
-			"(wait until plots are updated to click)"
+				), br(),
+				"(wait until plots are updated to click)"
+			)
 		),
 		mainPanel(
 			fluidRow(
-				column(1, h6("Round: ")),
-				column(1, h6(textOutput("i"))),
-				column(1, h6(" of ")),
-				column(1, h6(textOutput("ntot")))
+				column(1, h4("Round")),
+				column(1, h4(textOutput("i"))),
+				column(1, h4("of")),
+				column(1, h4(textOutput("ntot")))
 			),
 			tabsetPanel(
 				type = "tabs",
