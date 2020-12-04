@@ -1,7 +1,9 @@
 # This script contains the frontend (user) interface of the shiny app.
 library(shinycssloaders)
+library(shinyjs)
 
 ui <- fluidPage(
+	shinyjs::useShinyjs(),
 	titlePanel("Prior elicitation"),
 	sidebarLayout(
 		position = "left",
@@ -25,13 +27,17 @@ ui <- fluidPage(
 				"Decision", br(),
 				"(please wait for the plots to update", br(),
 				"before clicking the buttons below)", br(),
-				actionButton(
-					inputId = "choose_left",
-					label = "Left/top plot is more realistic"
+				shinyjs::disable(
+					actionButton(
+						inputId = "choose_left",
+						label = "Left/top plot is more realistic"
+					),
 				),
-				actionButton(
-					inputId = "choose_right",
-					label = "Right/bottom plot is more realistic"
+				shinyjs::disable(
+					actionButton(
+						inputId = "choose_right",
+						label = "Right/bottom plot is more realistic"
+					)
 				)
 			)
 		),
