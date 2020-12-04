@@ -23,6 +23,8 @@ ui <- fluidPage(
 			conditionalPanel(
 				condition = "input.start_pari",
 				"Decision", br(),
+				"(please wait for the plots to update", br(),
+				"before clicking the buttons below)", br(),
 				actionButton(
 					inputId = "choose_left",
 					label = "Left/top plot is more realistic"
