@@ -58,8 +58,8 @@ ui <- fluidPage(
 					title = "Pari-PRECIOUS",
 					actionLink("start_pari", "Click here to start"), br(),
 					h2(uiOutput("final_link_pari")),
-					shinycssloaders::withSpinner(plotOutput("barplot_left")),
-					shinycssloaders::withSpinner(plotOutput("barplot_right"))
+					plotOutput("barplot_left"),
+					plotOutput("barplot_right")
 				)
 			)
 		)
