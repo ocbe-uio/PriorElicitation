@@ -1,9 +1,6 @@
 import numpy as np
 import GPy
 from GPy.likelihoods.link_functions import GPTransformation
-# from GPy.util.univariate_Gaussian import std_norm_cdf, std_norm_pdf
-# from GPy.util.misc import safe_exp, safe_square, safe_cube, safe_quad,
-# safe_three_times
 
 
 def g_log(X):

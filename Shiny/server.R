@@ -311,8 +311,6 @@ server <- function(input, output, session) {
 			col = rgb(.2, .3, .5),
 			border=NA
 		)
-		# shinyjs::enable("choose_left")
-		# shinyjs::enable("choose_right")
 	})
 	output$barplot_right <- renderPlot({
 		barplot(
@@ -321,8 +319,6 @@ server <- function(input, output, session) {
 			col = rgb(.2, .3, .5),
 			border=NA
 		)
-		# shinyjs::enable("choose_left")
-		# shinyjs::enable("choose_right")
 	})
 
 	# Saving output ----------------------------------------------------------
