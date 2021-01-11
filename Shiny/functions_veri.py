@@ -51,7 +51,7 @@ def bo_acquisition(m, X):
     return(acquisition_f)
 
 
-def gen_sim(Xi):
+def gen_sim(Xi, fix_seed=False):
     """
     Generates random draws from a Binomial distribution
 
@@ -63,6 +63,8 @@ def gen_sim(Xi):
         The idea for now is to have R only working in the frontend
         (and the Shiny server side).
     """
+    if (fix_seed):
+        np.random.seed(848855)
     ss = np.random.binomial(n=100, p=Xi)
     return(ss)
 
@@ -115,13 +117,14 @@ def model_update_veri(m, X_acq, y_acq, i, n_opt):
     return(m)
 
 
-def acquire_X_veri(m, Xgrid, acq_noise=0.1):
-
+def acquire_X_veri(m, Xgrid, acq_noise=0.1, fix_seed=False):
     # for i in range(n_update):
     thisXgrid = Xgrid.copy()
     X_acq = np.expand_dims(
         thisXgrid[np.argmax(bo_acquisition(m, thisXgrid)), :], axis=1
     )
+    if (fix_seed):
+        np.random.seed(848855)
     X_acq += np.random.normal(0, acq_noise, np.shape(X_acq))
     X_acq = min(max(X_acq, 0 * X_acq), X_acq / X_acq)
     return(X_acq)

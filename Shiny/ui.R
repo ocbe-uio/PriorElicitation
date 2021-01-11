@@ -62,9 +62,13 @@ ui <- fluidPage(
 					plotOutput("barplot_right")
 				)
 			),
+			# Debug mode and fixed seed mode switches
 			span(
 				actionLink(
 					"debugSwitch", "", icon("bug"), style="color:lightgray"
+				),
+				actionLink(
+					"fixSeed", "", icon("dice-five"), style="color:lightgray"
 				)
 			)
 		)
