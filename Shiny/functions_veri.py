@@ -44,6 +44,7 @@ class Logit(GPTransformation):
         input_dict["class"] = "GPy.likelihoods.link_functions.Logit"
         return input_dict
 
+
 def bo_acquisition(m, X):
     pred_f = m.predict_noiseless(X)
     acquisition_f = pred_f[0] + 2. * np.sqrt(pred_f[1])
@@ -65,36 +66,6 @@ def gen_sim(Xi):
     ss = np.random.binomial(n=100, p=Xi)
     return(ss)
 
-
-def plotting(Xtrain, ytrain, pred_f, Xgrid, lik_proxy, post_proxy, m, stage=1):
-    if (stage == 1):
-        plt.scatter(Xtrain, ytrain)
-        plt.show()
-
-        plt.plot(Xgrid, pred_f[0])
-        plt.plot(Xgrid, pred_f[0] + 1.96 * np.sqrt(pred_f[1]))
-        plt.plot(Xgrid, pred_f[0] - 1.96 * np.sqrt(pred_f[1]))
-        plt.show()
-
-        plt.plot(Xgrid, bo_acquisition(m, Xgrid))
-        plt.show()
-    else:
-        plt.plot(Xgrid, pred_f[0])
-        plt.plot(Xgrid, pred_f[0] + 1.96 * np.sqrt(pred_f[1]))
-        plt.plot(Xgrid, pred_f[0] - 1.96 * np.sqrt(pred_f[1]))
-        plt.show()
-
-        plt.plot(Xgrid, bo_acquisition(m, Xgrid))
-        plt.show()
-
-        plt.plot(Xgrid, lik_proxy)
-        plt.show()
-
-        plt.plot(Xgrid, post_proxy)
-        plt.show()
-
-        plt.scatter(m.X, m.Y)
-        plt.show()
 
 def model_fit_veri(Xtrain, ytrain):
     # Kernel
@@ -143,6 +114,7 @@ def model_update_veri(m, X_acq, y_acq, i, n_opt):
 
     return(m)
 
+
 def acquire_X_veri(m, Xgrid, acq_noise=0.1):
 
     # for i in range(n_update):
@@ -154,13 +126,16 @@ def acquire_X_veri(m, Xgrid, acq_noise=0.1):
     X_acq = min(max(X_acq, 0 * X_acq), X_acq / X_acq)
     return(X_acq)
 
+
 def calc_lik_proxy_veri(m, Xgrid):
     lik_proxy = np.exp(m.predict_noiseless(Xgrid)[0])
     return(lik_proxy)
 
+
 def calc_post_proxy(lik_proxy):
     post_proxy = lik_proxy / (np.sum(lik_proxy * 0.01))
     return(post_proxy)
+
 
 def calc_pred_f(m, Xgrid):
     pred_f = m.predict_noiseless(Xgrid)
