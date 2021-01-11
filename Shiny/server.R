@@ -326,7 +326,6 @@ server <- function(input, output, session) {
 	# Saving output ----------------------------------------------------------
 
 	session$onSessionEnded(function() {
-		if (debugMode$clicked) debug <- TRUE
 		saved_objects <- list(
 			"gpy_params" = isolate(model$fit$param_array),
 			# TODO: make sure theta_acq and label_acq match their models
@@ -343,7 +342,7 @@ server <- function(input, output, session) {
 		machine_name <- system("uname -n", intern=TRUE)
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
 		file_name <- paste("Results", date_time, machine_name, sep="_")
-		if (debug) {
+		if (isolate(debugMode$clicked)) {
 			message("Exported list structure:")
 			print(str(saved_objects))
 			lapply(saved_objects, summary)
