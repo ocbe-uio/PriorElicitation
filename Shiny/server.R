@@ -47,9 +47,11 @@ server <- function(input, output, session) {
 	i <- reactiveValues(i = 0, round1over = FALSE, round2over = FALSE)
 	n <- reactiveValues(init = 0, tot = 0)
 	debugMode <- reactiveValues(clicked = FALSE)
+	seed <- reactiveValues(fixed = FALSE)
 
-	# Debug mode manual switch -----------------------------------------------
+	# Debug mode and fixed seed manual switches ------------------------------
 	observeEvent(input$debugSwitch, debugMode$clicked <- TRUE)
+	observeEvent(input$fixSeed, seed$fixed <- TRUE)
 
 	# Starting Veri or Pari-PRECIOUS -----------------------------------------
 	observeEvent(input$start_veri, {
@@ -162,7 +164,7 @@ server <- function(input, output, session) {
 			# Second round: gather values from model
 			model$fit <- fit_model_veri()
 			if (debug) print(model$fit)
-			acquire_X_veri(model$fit, X$grid)
+			acquire_X_veri(model$fit, X$grid, fix_seed=seed$fixed)
 		}
 	})
 
@@ -188,7 +190,7 @@ server <- function(input, output, session) {
 		if (i$i <= n$tot) {
 			X$latest <- get_X()
 			X$series <- append(X$series, X$latest)
-			sim_result$latest <- gen_sim(X$latest)
+			sim_result$latest <- gen_sim(X$latest, seed$fixed)
 			sim_result$series <- append(sim_result$series, sim_result$latest)
 			if (debug) {
 				print(X$latest)
