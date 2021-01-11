@@ -6,18 +6,18 @@ This is a web application for collecting data from content "specialists" in orde
 
 # Using
 
-After the development stage is complete, a stable version of this software will be available online with proper access instructions.
+## Online version
 
-In the meantime, we recommend you try the Shiny application by running the following command from an interactive R session (you may have to run `install.packages("shiny")` before to install the Shiny R package):
+Please visit the following URL to use the PriorElicitation app on your browser:
+
+https://ocbe.shinyapps.io/elicit/
+
+## Local hosting
+
+You can also host the app on your computer, which is especially useful for developers. Run the following command from an interactive R session (you may have to run `install.packages("shiny")` before to install the Shiny R package):
 
 ```R
 shiny::runGitHub("PriorElicitation", "ocbe-uio", "dev", "Shiny")
-```
-
-The command above will always run the latest development version of the app available on GitHub. If you download a copy of the code, you can run that local copy by executing the [runShiny.R](runShiny.R) script in R.
-
-```R
-source("runShiny.R")
 ```
 
 # Contributing
