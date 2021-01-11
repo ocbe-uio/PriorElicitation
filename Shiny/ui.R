@@ -61,6 +61,11 @@ ui <- fluidPage(
 					plotOutput("barplot_left"),
 					plotOutput("barplot_right")
 				)
+			),
+			span(
+				actionLink(
+					"debugSwitch", "", icon("bug"), style="color:lightgray"
+				)
 			)
 		)
 	)
