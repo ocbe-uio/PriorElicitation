@@ -7,11 +7,13 @@ import functions_veri
 # =========================================================================== #
 
 
-def sample_crp(alpha, theta, n):
+def sample_crp(alpha, theta, n, fix_seed=False):
     membership = [1]
     for i in range(1, n):
         probs = ([(m - alpha) / (i + theta) for m in membership]
                  + [(theta + len(membership) * alpha) / (i + theta)])
+        if (fix_seed):
+            np.random.seed(848855)
         newmember = np.random.multinomial(n=1, pvals=np.array(probs)).tolist()
         if newmember[-1]:
             membership = membership + [1]
@@ -23,10 +25,12 @@ def sample_crp(alpha, theta, n):
     return(membership)
 
 
-def dts_acquisition_X(m, X):
+def dts_acquisition_X(m, X, fix_seed=False):
     pred_noiseless_mean, pred_noiseless_var = m.predict_noiseless(
         X, full_cov=False
     )
+    if (fix_seed):
+        np.random.seed(848855)
     pred_noiseless_samples = np.random.normal(size=(2601, 1000)) \
         * np.sqrt(pred_noiseless_var) \
         + pred_noiseless_mean
@@ -153,7 +157,9 @@ def model_update_pari(m, X_acq_opt, y_acq, i, n_opt):  # L127
     return(m)
 
 
-def acquire_X_pari(m, Xtest, acq_noise=0.1):
+def acquire_X_pari(m, Xtest, acq_noise=0.1, fix_seed=False):
+    if (fix_seed):
+        np.random.seed(848855)
     thisXacq = Xtest.copy()
     X_acq_opt = dts_acquisition_X(m, thisXacq)
     X_acq_opt += np.random.normal(0, acq_noise, np.shape(X_acq_opt))
@@ -162,7 +168,9 @@ def acquire_X_pari(m, Xtest, acq_noise=0.1):
     return(X_acq_opt)
 
 
-def gen_X_plots_values(X):  # L187
+def gen_X_plots_values(X, fix_seed=False):  # L187
+    if (fix_seed):
+        np.random.seed(848855)
     members_0 = sample_crp(X[0], 0., 100)
     members_1 = sample_crp(X[1], 0., 100)
     # Random procedure below rendomizes order of plots

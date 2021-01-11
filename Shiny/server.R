@@ -178,7 +178,7 @@ server <- function(input, output, session) {
 			# Second round: gather values from model
 			model$fit <- fit_model_pari()
 			if (debug) print(model$fit)
-			acquire_X_pari(model$fit, X$grid)
+			acquire_X_pari(model$fit, X$grid, seed$fixed)
 		}
 	})
 
@@ -205,7 +205,7 @@ server <- function(input, output, session) {
 		if (i$i <= n$tot) {
 			X$latest <- get_X_pairs()
 			X$series <- rbind(X$series, X$latest)
-			X$plots_heights <- gen_X_plots_values(as.list(X$latest))
+			X$plots_heights <- gen_X_plots_values(as.list(X$latest), seed$fixed)
 			sim_result$latest <- X$plots_heights
 			sim_result$series <- c(sim_result$series, list(sim_result$latest))
 			if (debug) {
