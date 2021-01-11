@@ -46,9 +46,14 @@ server <- function(input, output, session) {
 	proxy <- reactiveValues(lik = 0, post = 0, pred_f = NULL)
 	i <- reactiveValues(i = 0, round1over = FALSE, round2over = FALSE)
 	n <- reactiveValues(init = 0, tot = 0)
+	debugMode <- reactiveValues(clicked = FALSE)
+
+	# Debug mode manual switch -----------------------------------------------
+	observeEvent(input$debugSwitch, debugMode$clicked <- TRUE)
 
 	# Starting Veri or Pari-PRECIOUS -----------------------------------------
 	observeEvent(input$start_veri, {
+		if (debugMode$clicked) debug <- TRUE
 		method$name <- "veri"
 		all_n <- init_n(debug, method$name)
 		n$init <- all_n[[1]]
@@ -67,6 +72,7 @@ server <- function(input, output, session) {
 		}
 	})
 	observeEvent(input$start_pari, {
+		if (debugMode$clicked) debug <- TRUE
 		method$name <- "pari"
 		temp_n_init <- init_n(debug, "pari-prep")[[1]]  # Works around issue #1
 		init_x_values <- init_X(method$name, temp_n_init)
@@ -117,6 +123,7 @@ server <- function(input, output, session) {
 	})
 
 	fit_model_pari <- reactive({
+		if (debugMode$clicked) debug <- TRUE
 		if (i$i > n$init) {
 			# Reshaping X and Y ------------------------------------------------
 			temp_n_init <- init_n(debug, "pari-prep")[[1]]
@@ -145,6 +152,7 @@ server <- function(input, output, session) {
 	# Creating function to retrieve theta (X) --------------------------------
 
 	get_X <- reactive({ # Used by Veri
+		if (debugMode$clicked) debug <- TRUE
 		# Function to retrieve the thetas (Xs) depending on which stage we are
 		# Results of this function are one number
 		if (i$i <= n$init) {
@@ -159,6 +167,7 @@ server <- function(input, output, session) {
 	})
 
 	get_X_pairs <- reactive({ # Used by Pari
+		if (debugMode$clicked) debug <- TRUE
 		# Results of this function are pairs of numbers
 		if (i$i <= n$init) {
 			# First round: gather values from pre-generated probability grid
@@ -174,6 +183,7 @@ server <- function(input, output, session) {
 	# generating X, simulating value, updating model -------------------------
 
 	generate_X_ss <- reactive({ # Used by Veri
+		if (debugMode$clicked) debug <- TRUE
 		i$i <- i$i + 1
 		if (i$i <= n$tot) {
 			X$latest <- get_X()
@@ -188,6 +198,7 @@ server <- function(input, output, session) {
 	})
 
 	generate_X_plots_heights <- reactive({ # Used by Pari
+		if (debugMode$clicked) debug <- TRUE
 		i$i <- i$i + 1
 		if (i$i <= n$tot) {
 			X$latest <- get_X_pairs()
@@ -315,6 +326,7 @@ server <- function(input, output, session) {
 	# Saving output ----------------------------------------------------------
 
 	session$onSessionEnded(function() {
+		if (debugMode$clicked) debug <- TRUE
 		saved_objects <- list(
 			"gpy_params" = isolate(model$fit$param_array),
 			# TODO: make sure theta_acq and label_acq match their models
