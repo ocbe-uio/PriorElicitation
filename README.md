@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/274542998.svg)](https://zenodo.org/badge/latestdoi/274542998)
+
 # Introduction
 
 This is a web application for collecting data from content "specialists" in order to elicit prior distributions. It is written using [Shiny](https://shiny.rstudio.com/), [R](https://www.r-project.org/) and [Python](https://www.python.org/).
