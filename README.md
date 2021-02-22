@@ -18,7 +18,9 @@ https://ocbe.shinyapps.io/elicit/
 
 ## Local hosting
 
-You can also host the app on your computer, which is especially useful for developers. Run the following command from an interactive R session (you may have to run `install.packages("shiny")` before to install the Shiny R package):
+You can also host the app on your computer, which is especially useful for developers. The app also runs noticeably faster locally than it does on the Shinyapps server.
+
+Run the following command from an interactive R session (you may have to run `install.packages("shiny")` before to install the Shiny R package):
 
 ```R
 shiny::runGitHub("PriorElicitation", "ocbe-uio", "dev", "Shiny")
