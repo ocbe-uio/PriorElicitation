@@ -1,4 +1,5 @@
 #! /bin/bash
+# This script increments the build version in the CITATION.cff file
 
 # ======================================================== #
 # Finding version number parts                             #
@@ -8,6 +9,10 @@ versionline=$(cat CITATION.cff | grep ^version)
 version=$(echo $versionline | cut -d ' ' -f 2)
 version_nobuild=$(echo $version | cut -d '+' -f 1)
 buildnumber=$(echo $version | cut -d '+' -f 2)
+
+# ======================================================== #
+# Calculating new build version                            #
+# ======================================================== #
 
 if [ $buildnumber = $version ]
 then
@@ -20,6 +25,10 @@ else
 	version="$version_nobuild+$buildnumber"
 	newversionline="version: $version"
 fi
+
+# ======================================================== #
+# Overwriting CITATION.cff                                 #
+# ======================================================== #
 
 echo -en "New software version: $version\nOverwrite? [y/N] "
 read overwrite
