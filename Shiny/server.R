@@ -27,6 +27,7 @@ if (debug) {
 		"########################################\n",
 		"# ------ RUNNING IN DEBUG MODE ------- #\n",
 		"# Flip the switch on initialObjects.py #\n",
+		"# Or click on the bug icon on the GUI. #\n",
 		"########################################"
 	)
 }
