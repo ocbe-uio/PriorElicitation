@@ -13,4 +13,4 @@ clean:
 	trash Shiny/Results_*
 	trash Results_*
 incrementbuildversion:
-	./increment_build_version.sh
+	increment_cff_build_version.sh
