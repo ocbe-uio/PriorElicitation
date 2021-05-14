@@ -3,7 +3,7 @@ library(shinycssloaders)
 
 ui <- fluidPage(
 	shinyjs::useShinyjs(),
-	titlePanel("Prior elicitation"),
+	titlePanel("Prior Elicitation"),
 	sidebarLayout(
 		position = "left",
 		sidebarPanel(
