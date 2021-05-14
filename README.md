@@ -1,7 +1,5 @@
 [![DOI](https://zenodo.org/badge/235075398.svg)](https://zenodo.org/badge/latestdoi/235075398)
 
-
-
 # Introduction
 
 This is a web application for collecting data from content "specialists" in order to elicit prior distributions. It is written using [Shiny](https://shiny.rstudio.com/), [R](https://www.r-project.org/) and [Python](https://www.python.org/).
@@ -25,6 +23,8 @@ Run the following command from an interactive R session (you may have to run `in
 ```R
 shiny::runGitHub("PriorElicitation", "ocbe-uio", "dev", "Shiny")
 ```
+
+If you have Make installed, you can also conviently run PriorElicitation from the command line with `make run`.
 
 # Contributing
 
