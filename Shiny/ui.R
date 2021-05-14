@@ -9,7 +9,7 @@ ui <- fluidPage(
 		sidebarPanel(
 			conditionalPanel(
 				condition = "input.start_veri",
-				"Decision", br(),
+				"Decision (wait for new number to load)", br(),
 				actionButton(
 					inputId = "realistic",
 					label = "Number is realistic",

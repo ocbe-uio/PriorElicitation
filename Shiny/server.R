@@ -220,18 +220,26 @@ server <- function(input, output, session) {
 	# Recording judgements ---------------------------------------------------
 	observeEvent(input$realistic, {
 		if (i$i <= n$tot) {
+			shinyjs::disable("realistic")
+			shinyjs::disable("unrealistic")
 			# Record latest decision
 			decisions$latest <- 1
 			decisions$series <- append(decisions$series, 1)
 			generate_X_ss()
+			shinyjs::enable("realistic")
+			shinyjs::enable("unrealistic")
 		}
 	})
 	observeEvent(input$unrealistic, {
 		if (i$i <= n$tot) {
+			shinyjs::disable("realistic")
+			shinyjs::disable("unrealistic")
 			# Record latest decision
 			decisions$latest <- 0
 			decisions$series <- append(decisions$series, 0)
 			generate_X_ss()
+			shinyjs::enable("realistic")
+			shinyjs::enable("unrealistic")
 		}
 	})
 	observeEvent(input$choose_left, {
