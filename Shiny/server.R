@@ -359,6 +359,8 @@ server <- function(input, output, session) {
 	# Saving output ----------------------------------------------------------
 
 	session$onSessionEnded(function() {
+		# Final objects ------------------------------------------ #
+		# TODO: saved_objects is duplicated from above, refactor as function
 		saved_objects <- list(
 			"gpy_params" = isolate(model$fit$param_array),
 			# TODO: make sure theta_acq and label_acq match their models
@@ -372,9 +374,13 @@ server <- function(input, output, session) {
 			"var_pred_grid"      = isolate(proxy$pred_f[[2]]),
 			"simulations"        = isolate(sim_result$series)
 		)
+
+		# Objects for saving to Dropbox -------------------------- #
 		machine_name <- system("uname -n", intern=TRUE)
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
 		file_name <- paste("Results", date_time, machine_name, sep="_")
+
+		# Final output (R printout or Dropbox object) ------------ #
 		if (isolate(debugMode$clicked)) {
 			message("Exported list structure:")
 			print(str(saved_objects))
