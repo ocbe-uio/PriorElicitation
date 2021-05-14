@@ -58,8 +58,10 @@ ui <- fluidPage(
 					title = "Pari-PRECIOUS",
 					actionLink("start_pari", "Click here to start"), br(),
 					h2(uiOutput("final_link_pari")),
-					plotOutput("barplot_left"),
-					plotOutput("barplot_right")
+					fluidRow(
+						column(6, plotOutput("barplot_left")),
+						column(6, plotOutput("barplot_right")),
+					)
 				)
 			),
 			# Debug mode and fixed seed mode switches
