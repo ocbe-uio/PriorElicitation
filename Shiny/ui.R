@@ -52,7 +52,8 @@ ui <- fluidPage(
 					fluidRow(
 						column(3, h1("Number: ")),
 						column(2, h1(textOutput("ss")))
-					)
+					),
+					plotOutput("finalPlot")
 				),
 				tabPanel(
 					title = "Pari-PRECIOUS",
