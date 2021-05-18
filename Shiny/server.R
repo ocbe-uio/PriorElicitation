@@ -344,11 +344,34 @@ server <- function(input, output, session) {
 						pch    = c(NA, 1),
 						col    = c("black", "blue")
 					)
-					# plot(saved_objects$theta_acquisitions, saved_objects$label_acquisitions) # TODO: change to points()
 				} else {
 					NULL
 				}
-		})
+			})
+			output$finalPlot_pari <- renderPlot({
+				if (i$i > n$tot) {
+					# Final objects ------------------------------------------ #
+					saved_objects <- genSavedObjects()
+					x <- y <- sort(unique(saved_objects$theta_grid[, 1]))
+					z <- saved_objects$post_proxy
+					persp(
+						x    = x,
+						y    = y,
+						z    = z,
+						xlab = "Theta (x)",
+						ylab = "Theta (y)",
+						zlab = "Post proxy",
+						main = "Posterior proxy by theta"
+					)
+					# TODO: make second plot
+					# x <- y <- sort(unique(saved_objects$theta_acquisitions[, 1]))
+					# z <- as.numeric(saved_objects$label_acquisitions == "left")
+					# persp(x, y, z)
+					# points(saved_objects$theta_acquisitions, saved_objects$label_acquisitions) # TODO: change to points()
+				} else {
+					NULL
+				}
+			})
 		}
 	})
 
