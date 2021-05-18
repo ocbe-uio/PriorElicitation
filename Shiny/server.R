@@ -317,7 +317,7 @@ server <- function(input, output, session) {
 					NULL
 				}
 			})
-			output$finalPlot <- renderPlot({
+			output$finalPlot_veri <- renderPlot({
 				if (i$i > n$tot) {
 					# Final objects ------------------------------------------ #
 					saved_objects <- genSavedObjects()

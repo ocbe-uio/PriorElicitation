@@ -53,7 +53,7 @@ ui <- fluidPage(
 						column(3, h1("Number: ")),
 						column(2, h1(textOutput("ss")))
 					),
-					plotOutput("finalPlot")
+					plotOutput("finalPlot_veri")
 				),
 				tabPanel(
 					title = "Pari-PRECIOUS",
@@ -62,7 +62,8 @@ ui <- fluidPage(
 					fluidRow(
 						column(6, plotOutput("barplot_left")),
 						column(6, plotOutput("barplot_right")),
-					)
+					),
+					plotOutput("finalPlot_pari")
 				)
 			),
 			# Debug mode and fixed seed mode switches
