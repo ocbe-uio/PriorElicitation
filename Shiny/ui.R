@@ -44,7 +44,7 @@ ui <- fluidPage(
 			),
 			tabsetPanel(
 				type = "tabs",
-				selected = "Pari-PRECIOUS",
+				selected = "Veri-PRECIOUS",
 				tabPanel(
 					title = "Veri-PRECIOUS",
 					actionLink("start_veri", "Click here to start"), br(),
