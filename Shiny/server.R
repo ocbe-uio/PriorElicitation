@@ -321,10 +321,28 @@ server <- function(input, output, session) {
 				if (i$i > n$tot) {
 					# Final objects ------------------------------------------ #
 					saved_objects <- genSavedObjects()
+					par(mar=c(5, 4, 4, 8), xpd=TRUE)
 					plot(
 						x    = saved_objects$theta_grid,
 						y    = saved_objects$post_proxy,
-						type = "l"
+						type = "l",
+						xlab = "Theta",
+						ylab = "Post proxy/acquisition",
+						main = "Posterior proxy and acquisitions by theta",
+						ylim = c(0, 1)
+					)
+					points(
+						x = saved_objects$theta_acquisitions,
+						y = saved_objects$label_acquisitions,
+						col="blue"
+					)
+					legend(
+						"topright",
+						inset  = c(-0.2, 0),
+						legend = c("Post proxy", "Acq."),
+						lwd    = c(1, NA),
+						pch    = c(NA, 1),
+						col    = c("black", "blue")
 					)
 					# plot(saved_objects$theta_acquisitions, saved_objects$label_acquisitions) # TODO: change to points()
 				} else {
