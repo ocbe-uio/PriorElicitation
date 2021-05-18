@@ -266,6 +266,21 @@ server <- function(input, output, session) {
 	})
 
 	# Final calculations -----------------------------------------------------
+	genSavedObjects <- function() {
+		list(
+				"gpy_params" = isolate(model$fit$param_array),
+				# TODO: make sure theta_acq and label_acq match their models
+				# counterparts when the model updates are fixed
+				"theta_acquisitions" = isolate(X$series),
+				"label_acquisitions" = isolate(decisions$series),
+				"theta_grid"         = isolate(X$grid),
+				"lik_proxy"          = isolate(proxy$lik),
+				"post_proxy"         = isolate(proxy$post),
+				"mean_pred_grid"     = isolate(proxy$pred_f[[1]]),
+				"var_pred_grid"      = isolate(proxy$pred_f[[2]]),
+				"simulations"        = isolate(sim_result$series)
+			)
+	}
 
 	observe({
 		if (i$i > n$tot) {
@@ -305,19 +320,7 @@ server <- function(input, output, session) {
 			output$finalPlot <- renderPlot({
 				if (i$i > n$tot) {
 					# Final objects ------------------------------------------ #
-					saved_objects <- list(
-						"gpy_params" = isolate(model$fit$param_array),
-						# TODO: make sure theta_acq and label_acq match their models
-						# counterparts when the model updates are fixed
-						"theta_acquisitions" = isolate(X$series),
-						"label_acquisitions" = isolate(decisions$series),
-						"theta_grid"         = isolate(X$grid),
-						"lik_proxy"          = isolate(proxy$lik),
-						"post_proxy"         = isolate(proxy$post),
-						"mean_pred_grid"     = isolate(proxy$pred_f[[1]]),
-						"var_pred_grid"      = isolate(proxy$pred_f[[2]]),
-						"simulations"        = isolate(sim_result$series)
-					)
+					saved_objects <- genSavedObjects()
 					plot(
 						x    = saved_objects$theta_grid,
 						y    = saved_objects$post_proxy,
@@ -361,19 +364,7 @@ server <- function(input, output, session) {
 	session$onSessionEnded(function() {
 		# Final objects ------------------------------------------ #
 		# TODO: saved_objects is duplicated from above, refactor as function
-		saved_objects <- list(
-			"gpy_params" = isolate(model$fit$param_array),
-			# TODO: make sure theta_acq and label_acq match their models
-			# counterparts when the model updates are fixed
-			"theta_acquisitions" = isolate(X$series),
-			"label_acquisitions" = isolate(decisions$series),
-			"theta_grid"         = isolate(X$grid),
-			"lik_proxy"          = isolate(proxy$lik),
-			"post_proxy"         = isolate(proxy$post),
-			"mean_pred_grid"     = isolate(proxy$pred_f[[1]]),
-			"var_pred_grid"      = isolate(proxy$pred_f[[2]]),
-			"simulations"        = isolate(sim_result$series)
-		)
+		saved_objects <- genSavedObjects()
 
 		# Objects for saving to Dropbox -------------------------- #
 		machine_name <- system("uname -n", intern=TRUE)
