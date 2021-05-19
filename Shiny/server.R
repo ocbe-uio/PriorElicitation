@@ -4,6 +4,7 @@ library(reticulate)
 library(shiny)
 library(rdrop2)
 library(shinyjs)
+library(scatterplot3d)
 
 # Starting the virtual environment ===========================================
 
@@ -354,6 +355,7 @@ server <- function(input, output, session) {
 					saved_objects <- genSavedObjects()
 					x <- y <- sort(unique(saved_objects$theta_grid[, 1]))
 					z <- saved_objects$post_proxy
+					par(mfrow=c(1, 2))
 					persp(
 						x    = x,
 						y    = y,
@@ -363,11 +365,17 @@ server <- function(input, output, session) {
 						zlab = "Post proxy",
 						main = "Posterior proxy by theta"
 					)
-					# TODO: make second plot
-					# x <- y <- sort(unique(saved_objects$theta_acquisitions[, 1]))
-					# z <- as.numeric(saved_objects$label_acquisitions == "left")
-					# persp(x, y, z)
-					# points(saved_objects$theta_acquisitions, saved_objects$label_acquisitions) # TODO: change to points()
+					scatterplot3d(
+						x = saved_objects$theta_acquisitions[, 1],
+						y = saved_objects$theta_acquisitions[, 2],
+						z = as.numeric(saved_objects$label_acquisitions == "left"),
+						type = "h",
+						xlab = "Theta (x)",
+						ylab = "Theta (y)",
+						zlab = "Label (0 = left, 1 = right)",
+						main = "Label acquisition by theta"
+					)
+					par(mfrow=c(1, 1))
 				} else {
 					NULL
 				}
