@@ -270,8 +270,6 @@ server <- function(input, output, session) {
 	genSavedObjects <- function() {
 		list(
 				"gpy_params" = isolate(model$fit$param_array),
-				# TODO: make sure theta_acq and label_acq match their models
-				# counterparts when the model updates are fixed
 				"theta_acquisitions" = isolate(X$series),
 				"label_acquisitions" = isolate(decisions$series),
 				"theta_grid"         = isolate(X$grid),
@@ -412,7 +410,6 @@ server <- function(input, output, session) {
 
 	session$onSessionEnded(function() {
 		# Final objects ------------------------------------------ #
-		# TODO: saved_objects is duplicated from above, refactor as function
 		saved_objects <- genSavedObjects()
 
 		# Objects for saving to Dropbox -------------------------- #
