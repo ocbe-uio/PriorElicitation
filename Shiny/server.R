@@ -4,6 +4,7 @@ library(reticulate)
 library(shiny)
 library(rdrop2)
 library(shinyjs)
+library(scatterplot3d)
 
 # Starting the virtual environment ===========================================
 
@@ -266,6 +267,19 @@ server <- function(input, output, session) {
 	})
 
 	# Final calculations -----------------------------------------------------
+	genSavedObjects <- function() {
+		list(
+				"gpy_params" = isolate(model$fit$param_array),
+				"theta_acquisitions" = isolate(X$series),
+				"label_acquisitions" = isolate(decisions$series),
+				"theta_grid"         = isolate(X$grid),
+				"lik_proxy"          = isolate(proxy$lik),
+				"post_proxy"         = isolate(proxy$post),
+				"mean_pred_grid"     = isolate(proxy$pred_f[[1]]),
+				"var_pred_grid"      = isolate(proxy$pred_f[[2]]),
+				"simulations"        = isolate(sim_result$series)
+			)
+	}
 
 	observe({
 		if (i$i > n$tot) {
@@ -302,6 +316,68 @@ server <- function(input, output, session) {
 					NULL
 				}
 			})
+			output$finalPlot_veri <- renderPlot({
+				if (i$i > n$tot) {
+					# Final objects ------------------------------------------ #
+					saved_objects <- genSavedObjects()
+					par(mar=c(5, 4, 4, 8), xpd=TRUE)
+					plot(
+						x    = saved_objects$theta_grid,
+						y    = saved_objects$post_proxy,
+						type = "l",
+						xlab = "Theta",
+						ylab = "Post proxy/acquisition",
+						main = "Posterior proxy and acquisitions by theta",
+						ylim = c(0, 1)
+					)
+					points(
+						x = saved_objects$theta_acquisitions,
+						y = saved_objects$label_acquisitions,
+						col="blue"
+					)
+					legend(
+						"topright",
+						inset  = c(-0.2, 0),
+						legend = c("Post proxy", "Acq."),
+						lwd    = c(1, NA),
+						pch    = c(NA, 1),
+						col    = c("black", "blue")
+					)
+				} else {
+					NULL
+				}
+			})
+			output$finalPlot_pari <- renderPlot({
+				if (i$i > n$tot) {
+					# Final objects ------------------------------------------ #
+					saved_objects <- genSavedObjects()
+					x <- y <- sort(unique(saved_objects$theta_grid[, 1]))
+					z <- saved_objects$post_proxy
+					par(mfrow=c(1, 2))
+					persp(
+						x    = x,
+						y    = y,
+						z    = z,
+						xlab = "Theta (x)",
+						ylab = "Theta (y)",
+						zlab = "Post proxy",
+						main = "Posterior proxy by theta"
+					)
+					scatterplot3d(
+						x = saved_objects$theta_acquisitions[, 1],
+						y = saved_objects$theta_acquisitions[, 2],
+						z = as.numeric(saved_objects$label_acquisitions == "left"),
+						type = "h",
+						xlab = "Theta (x)",
+						ylab = "Theta (y)",
+						zlab = "Label (0 = left, 1 = right)",
+						main = "Label acquisition by theta"
+					)
+					par(mfrow=c(1, 1))
+				} else {
+					NULL
+				}
+			})
 		}
 	})
 
@@ -333,22 +409,15 @@ server <- function(input, output, session) {
 	# Saving output ----------------------------------------------------------
 
 	session$onSessionEnded(function() {
-		saved_objects <- list(
-			"gpy_params" = isolate(model$fit$param_array),
-			# TODO: make sure theta_acq and label_acq match their models
-			# counterparts when the model updates are fixed
-			"theta_acquisitions" = isolate(X$series),
-			"label_acquisitions" = isolate(decisions$series),
-			"theta_grid"         = isolate(X$grid),
-			"lik_proxy"          = isolate(proxy$lik),
-			"post_proxy"         = isolate(proxy$post),
-			"mean_pred_grid"     = isolate(proxy$pred_f[[1]]),
-			"var_pred_grid"      = isolate(proxy$pred_f[[2]]),
-			"simulations"        = isolate(sim_result$series)
-		)
+		# Final objects ------------------------------------------ #
+		saved_objects <- genSavedObjects()
+
+		# Objects for saving to Dropbox -------------------------- #
 		machine_name <- system("uname -n", intern=TRUE)
 		date_time <- format(Sys.time(), "%Y_%m_%d_%H%M%S")
 		file_name <- paste("Results", date_time, machine_name, sep="_")
+
+		# Final output (R printout or Dropbox object) ------------ #
 		if (isolate(debugMode$clicked)) {
 			message("Exported list structure:")
 			print(str(saved_objects))

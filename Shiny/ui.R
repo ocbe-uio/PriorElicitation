@@ -44,7 +44,7 @@ ui <- fluidPage(
 			),
 			tabsetPanel(
 				type = "tabs",
-				selected = "Pari-PRECIOUS",
+				selected = "Veri-PRECIOUS",
 				tabPanel(
 					title = "Veri-PRECIOUS",
 					actionLink("start_veri", "Click here to start"), br(),
@@ -52,7 +52,8 @@ ui <- fluidPage(
 					fluidRow(
 						column(3, h1("Number: ")),
 						column(2, h1(textOutput("ss")))
-					)
+					),
+					plotOutput("finalPlot_veri")
 				),
 				tabPanel(
 					title = "Pari-PRECIOUS",
@@ -61,7 +62,8 @@ ui <- fluidPage(
 					fluidRow(
 						column(6, plotOutput("barplot_left")),
 						column(6, plotOutput("barplot_right")),
-					)
+					),
+					plotOutput("finalPlot_pari")
 				)
 			),
 			# Debug mode and fixed seed mode switches
