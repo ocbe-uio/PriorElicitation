@@ -51,6 +51,10 @@ server <- function(input, output, session) {
 	debugMode <- reactiveValues(clicked = FALSE)
 	seed <- reactiveValues(fixed = FALSE)
 
+	# Initializing other objects ---------------------------------------------
+	citation <- readLines("CITATION.cff")
+	output$version <- renderText(citation[grepl("^version", citation)])
+
 	# Debug mode and fixed seed manual switches ------------------------------
 	observeEvent(input$debugSwitch, debugMode$clicked <- TRUE)
 	observeEvent(input$fixSeed, seed$fixed <- TRUE)
