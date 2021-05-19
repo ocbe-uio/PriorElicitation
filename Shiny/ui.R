@@ -68,6 +68,7 @@ ui <- fluidPage(
 			),
 			# Debug mode and fixed seed mode switches
 			span(
+				span(textOutput("version"), style="color:lightgray"),
 				actionLink(
 					"debugSwitch", "", icon("bug"), style="color:lightgray"
 				),
