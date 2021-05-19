@@ -371,7 +371,7 @@ server <- function(input, output, session) {
 						xlab = "Theta (x)",
 						ylab = "Theta (y)",
 						zlab = "Label (0 = left, 1 = right)",
-						main = "Label acquisition by theta"
+						main = "(Pre-permutation) label acquisition by theta"
 					)
 					par(mfrow=c(1, 1))
 				} else {
