@@ -9,29 +9,17 @@ library(scatterplot3d)
 # Starting the virtual environment ===========================================
 
 virtualenv_create(
-	envname = "python_environment",
-	python  = "python3"
-)
-virtualenv_install(
-	envname = "python_environment",
+	envname  = "PriorElicitationPyEnv",
+	python   = "python3",
 	packages = c("numpy", "GPy", "matplotlib", "python-dateutil")
 )
-use_virtualenv("python_environment", required = FALSE)
+use_virtualenv("PriorElicitationPyEnv", required = FALSE)
 
 # Initializing Python and R constants and functions ==========================
 
 source_python("initialObjects.py")
 source_python("functions_veri.py")
 source_python("functions_pari.py")
-if (debug) {
-	message(
-		"########################################\n",
-		"# ------ RUNNING IN DEBUG MODE ------- #\n",
-		"# Flip the switch on initialObjects.py #\n",
-		"# Or click on the bug icon on the GUI. #\n",
-		"########################################"
-	)
-}
 
 # Define server logic ========================================================
 
@@ -61,7 +49,10 @@ server <- function(input, output, session) {
 
 	# Starting Veri or Pari-PRECIOUS -----------------------------------------
 	observeEvent(input$start_veri, {
-		if (debugMode$clicked) debug <- TRUE
+		if (debugMode$clicked) {
+			debug <- TRUE
+			message("Debugging mode activated")
+		}
 		method$name <- "veri"
 		all_n <- init_n(debug, method$name)
 		n$init <- all_n[[1]]
@@ -80,7 +71,10 @@ server <- function(input, output, session) {
 		}
 	})
 	observeEvent(input$start_pari, {
-		if (debugMode$clicked) debug <- TRUE
+		if (debugMode$clicked) {
+			debug <- TRUE
+			message("Debugging mode activated")
+		}
 		method$name <- "pari"
 		temp_n_init <- init_n(debug, "pari-prep")[[1]]  # Works around issue #1
 		init_x_values <- init_X(method$name, temp_n_init)
@@ -115,6 +109,9 @@ server <- function(input, output, session) {
 	fit_model_veri <- reactive({
 		if (i$i > n$init) {
 			if (i$i == n$init + 1) {
+				print(as.matrix(X$permutated)) #TEMP
+				print(as.matrix(decisions$series)) #TEMP
+				#FIXME: causing segfault on the call below
 				model_fit_veri(
 					as.matrix(X$permutated),
 					as.matrix(decisions$series)
@@ -199,8 +196,11 @@ server <- function(input, output, session) {
 			sim_result$latest <- gen_sim(X$latest, seed$fixed)
 			sim_result$series <- append(sim_result$series, sim_result$latest)
 			if (debug) {
-				print(X$latest)
-				print(sim_result$latest)
+				cat(
+					"X$latest:", formatC(X$latest, width=10),
+					" sim_result$latest:", formatC(sim_result$latest, width=10),
+					"\n"
+				)
 			}
 		}
 	})
@@ -216,8 +216,11 @@ server <- function(input, output, session) {
 			sim_result$series <- c(sim_result$series, list(sim_result$latest))
 			if (debug) {
 				message("Round ", i$i)
-				print(X$latest)
-				print(X$plots_heights)
+				cat(
+					"X$latest:", formatC(X$latest, width=10),
+					" X$plots_heights:", formatC(X$plots_heights, width=10),
+					"\n"
+				)
 			}
 		}
 	})
@@ -428,9 +431,9 @@ server <- function(input, output, session) {
 			lapply(saved_objects, summary)
 			message("Theta and label acquisitions:")
 			print(
-				data.frame(
-					saved_objects$theta_acquisitions,
-					saved_objects$label_acquisitions
+				list(
+					"theta_acquisitions" = saved_objects$theta_acquisitions,
+					"label_acquisitions" = saved_objects$label_acquisitions
 				)
 			)
 		} else {
