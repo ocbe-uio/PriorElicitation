@@ -107,23 +107,18 @@ server <- function(input, output, session) {
 
 	# Creating function to fit model -----------------------------------------
 	fit_model_veri <- reactive({
-		if (i$i > n$init) {
-			if (i$i == n$init + 1) {
-				print(as.matrix(X$permutated)) #TEMP
-				print(as.matrix(decisions$series)) #TEMP
-				#FIXME: causing segfault on the call below
-				model_fit_veri(
-					as.matrix(X$permutated),
-					as.matrix(decisions$series)
-				)
-			} else {
-				model_update_veri(
-					model$fit,
-					as.matrix(X$latest),
-					as.matrix(decisions$latest),
-					i$i, n_opt
-				)
-			}
+		if (i$i == n$init + 1) {
+			model_fit_veri(
+				as.matrix(X$permutated),
+				as.matrix(decisions$series)
+			)
+		} else if (i$i > n$init + 1) {
+			model_update_veri(
+				model$fit,
+				as.matrix(X$latest),
+				as.matrix(decisions$latest),
+				i$i, n_opt
+			)
 		}
 	})
 
@@ -216,11 +211,10 @@ server <- function(input, output, session) {
 			sim_result$series <- c(sim_result$series, list(sim_result$latest))
 			if (debug) {
 				message("Round ", i$i)
-				cat(
-					"X$latest:", formatC(X$latest, width=10),
-					" X$plots_heights:", formatC(X$plots_heights, width=10),
-					"\n"
-				)
+				cat("X$latest:")
+				print(X$latest)
+				cat("X$plots_heights:")
+				print(X$plots_heights)
 			}
 		}
 	})
