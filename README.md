@@ -1,4 +1,8 @@
 [![DOI](https://zenodo.org/badge/235075398.svg)](https://zenodo.org/badge/latestdoi/235075398)
+[![License: GPL-3](https://img.shields.io/badge/license-GPL--3-blue.svg)](https://cran.r-project.org/web/licenses/GPL-3)
+[![](https://img.shields.io/github/languages/code-size/ocbe-uio/PriorElicitation.svg)](https://github.com/ocbe-uio/PriorElicitation)
+[![](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![](https://img.shields.io/github/last-commit/ocbe-uio/PriorElicitation.svg)](https://github.com/ocbe-uio/PriorElicitation/commits/release-1.0.0)
 
 # Introduction
 
