@@ -47,6 +47,14 @@ ui <- fluidPage(
 				selected = "Veri-PRECIOUS",
 				tabPanel(
 					title = "Veri-PRECIOUS",
+					paste(
+						"The program will output a number representing the number",
+						"of coin-flips out of 100 that come up as heads. Please indicate",
+						"whether you think the number indicated is a reasonable example",
+						"of a number that might be observed in practice, according to your",
+						"personal intuitions as to what might be considered realistic.",
+						"You will be shown 100 numbers in total."
+					), br(),
 					actionLink("start_veri", "Click here to start"), br(),
 					h2(uiOutput("final_link_veri")),
 					fluidRow(
@@ -57,6 +65,13 @@ ui <- fluidPage(
 				),
 				tabPanel(
 					title = "Pari-PRECIOUS",
+					paste(
+						"The program will output two bar charts, each representing",
+						"the distribution of votes between unlabelled political parties in",
+						"a random selection of 100 voters. Please select which bar chart",
+						"you feel is a more realistic sample of vote distribution in a",
+						"specific country. You will be shown 100 pairs of charts in total."
+					), br(),
 					actionLink("start_pari", "Click here to start"), br(),
 					h2(uiOutput("final_link_pari")),
 					fluidRow(
