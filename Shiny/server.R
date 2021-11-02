@@ -12,9 +12,13 @@ virtualenv_create(
 	envname  = "PriorElicitationPyEnv",
 	python   = "python3",
 	version  = "3.8",
-	packages = c("scipy", "wheel", "numpy", "matplotlib", "python-dateutil", "Cython")
+	packages = c("scipy", "wheel", "numpy", "matplotlib", "python-dateutil")
 )
 use_virtualenv("PriorElicitationPyEnv", required = TRUE)
+virtualenv_install(
+	envname  = "PriorElicitationPyEnv",
+	packages = "Cython"
+)
 virtualenv_install(
 	envname  = "PriorElicitationPyEnv",
 	packages = "GPy"
