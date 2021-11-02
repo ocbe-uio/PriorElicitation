@@ -12,9 +12,13 @@ virtualenv_create(
 	envname  = "PriorElicitationPyEnv",
 	python   = "python3",
 	version  = "3.8",
-	packages = c("scipy", "wheel", "numpy", "GPy", "matplotlib", "python-dateutil")
+	packages = c("scipy", "wheel", "numpy", "matplotlib", "python-dateutil")
 )
 use_virtualenv("PriorElicitationPyEnv", required = FALSE)
+virtualenv_install(
+	envname  = "PriorElicitationPyEnv",
+	packages = "GPy"
+)
 
 # Initializing Python and R constants and functions ==========================
 
