@@ -40,7 +40,7 @@ server <- function(input, output, session) {
 	seed <- reactiveValues(fixed = FALSE)
 
 	# Initializing other objects ---------------------------------------------
-	citation <- readLines("CITATION.cff")
+	citation <- readLines("https://raw.githubusercontent.com/ocbe-uio/PriorElicitation/release-1.0.0/CITATION.cff")
 	output$version <- renderText(citation[grepl("^version", citation)])
 
 	# Debug mode and fixed seed manual switches ------------------------------
