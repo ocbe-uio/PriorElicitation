@@ -37,7 +37,7 @@ install.packages(c("shiny", "reticulate", "rdrop2", "shinyjs", "scatterplot3d", 
 Once you have all dependencies installed, run the following command from an interactive R session:
 
 ```R
-shiny::runGitHub("PriorElicitation", "ocbe-uio", "dev", "Shiny")
+shiny::runGitHub("PriorElicitation", "ocbe-uio", "release-1.0.0", "Shiny")
 ```
 
 If you have Make installed, you can also conviently run PriorElicitation from the command line with `make run`.
