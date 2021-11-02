@@ -14,7 +14,7 @@ virtualenv_create(
 	version  = "3.8",
 	packages = c("scipy", "wheel", "numpy", "matplotlib", "python-dateutil")
 )
-use_virtualenv("PriorElicitationPyEnv", required = FALSE)
+use_virtualenv("PriorElicitationPyEnv", required = TRUE)
 virtualenv_install(
 	envname  = "PriorElicitationPyEnv",
 	packages = "GPy"
