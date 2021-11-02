@@ -11,7 +11,7 @@ library(scatterplot3d)
 virtualenv_create(
 	envname  = "PriorElicitationPyEnv",
 	python   = "python3",
-	packages = c("wheel", "numpy", "GPy", "matplotlib", "python-dateutil")
+	packages = c("scipy", "wheel", "numpy", "GPy", "matplotlib", "python-dateutil")
 )
 use_virtualenv("PriorElicitationPyEnv", required = FALSE)
 
