@@ -12,7 +12,7 @@ virtualenv_create(
 	envname  = "PriorElicitationPyEnv",
 	python   = "python3",
 	version  = "3.8",
-	packages = c("scipy", "wheel", "numpy", "matplotlib", "python-dateutil")
+	packages = c("scipy", "wheel", "numpy", "matplotlib", "python-dateutil", "Cython")
 )
 use_virtualenv("PriorElicitationPyEnv", required = TRUE)
 virtualenv_install(
